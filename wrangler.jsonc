@@ -5,3 +5,5 @@
     "directory": "./"
   }
 }
+wrangler deploy --assets ./
+
