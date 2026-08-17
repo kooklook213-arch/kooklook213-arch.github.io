@@ -1,0 +1,191 @@
+{
+  "format_version": "1.8.0",
+  "scene": {
+    "background": {
+      "theme": "forest",
+      "color": [
+        "#14532d",
+        "#22c55e",
+        "#bef264"
+      ],
+      "lighting": "soft"
+    }
+  },
+  "animations": {
+    "walk_cycle": {
+      "loop": true,
+      "animation_length": 2.0,
+      "bones": {
+        "leftArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0.0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 0.5,
+              "angle": [
+                45.0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 1.0,
+              "angle": [
+                5.5109105961630896e-15,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 1.5,
+              "angle": [
+                -45.0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0.0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 0.5,
+              "angle": [
+                45.0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 1.0,
+              "angle": [
+                5.5109105961630896e-15,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 1.5,
+              "angle": [
+                -45.0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0.0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 0.5,
+              "angle": [
+                45.0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 1.0,
+              "angle": [
+                5.5109105961630896e-15,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 1.5,
+              "angle": [
+                -45.0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0.0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 0.5,
+              "angle": [
+                45.0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 1.0,
+              "angle": [
+                5.5109105961630896e-15,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 1.5,
+              "angle": [
+                -45.0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "head": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0.0,
+                0
+              ]
+            },
+            {
+              "time": 1.0,
+              "angle": [
+                0,
+                3.6739403974420594e-16,
+                0
+              ]
+            }
+          ],
+          "position": []
+        }
+      }
+    }
+  }
+}

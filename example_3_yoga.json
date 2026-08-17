@@ -1,0 +1,127 @@
+{
+  "format_version": "1.8.0",
+  "scene": {
+    "background": {
+      "theme": "lavender",
+      "color": [
+        "#c084fc",
+        "#a78bfa",
+        "#f9a8d4"
+      ],
+      "lighting": "soft"
+    }
+  },
+  "animations": {
+    "yoga_flow": {
+      "loop": true,
+      "animation_length": 4.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                25,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 3.95,
+              "angle": [
+                25,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                65,
+                0,
+                -20
+              ]
+            },
+            {
+              "time": 3.95,
+              "angle": [
+                65,
+                0,
+                -20
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                65,
+                0,
+                20
+              ]
+            },
+            {
+              "time": 3.95,
+              "angle": [
+                65,
+                0,
+                20
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                -65,
+                0,
+                10
+              ]
+            },
+            {
+              "time": 3.95,
+              "angle": [
+                -65,
+                0,
+                10
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                -65,
+                0,
+                -10
+              ]
+            },
+            {
+              "time": 3.95,
+              "angle": [
+                -65,
+                0,
+                -10
+              ]
+            }
+          ],
+          "position": []
+        }
+      }
+    }
+  }
+}
