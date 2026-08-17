@@ -1,0 +1,104 @@
+--- docs/animations/standing_pose.json (原始)
+
+
++++ docs/animations/standing_pose.json (修改后)
+{
+  "format_version": "1.8.0",
+  "scene": {
+    "background": {
+      "theme": "studio",
+      "color": [
+        "#4f46e5",
+        "#a78bfa",
+        "#f8fafc"
+      ],
+      "lighting": "soft"
+    }
+  },
+  "animations": {
+    "standing_pose": {
+      "loop": true,
+      "animation_length": 1,
+      "bones": {
+        "body": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "head": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                -10
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                10
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                2
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                -2
+              ]
+            }
+          ],
+          "position": []
+        }
+      }
+    }
+  }
+}
