@@ -1,0 +1,139 @@
+#!/usr/bin/env python3
+"""
+AI Minecraft Animation Generator
+Generates keyframe data for Blockbench animations
+"""
+
+import json
+import math
+
+class MinecraftAnimationGenerator:
+    def __init__(self, animation_name, duration_ticks):
+        self.animation_name = animation_name
+        self.duration_ticks = duration_ticks
+        self.keyframes = {}
+    
+    def add_walking_cycle(self, body_part, axis="rotation.x"):
+        """Generate a walking motion for a body part"""
+        keyframes = []
+        
+        for tick in range(0, self.duration_ticks, 10):
+            # Calculate smooth wave motion
+            progress = tick / self.duration_ticks
+            angle = math.sin(progress * math.pi * 2) * 45  # 45-degree swing
+            
+            keyframe = {
+                "timestamp": tick,
+                axis: angle
+            }
+            keyframes.append(keyframe)
+        
+        self.keyframes[body_part] = keyframes
+        return self
+    
+    def add_jumping_animation(self, body_part, height=50):
+        """Generate jumping motion"""
+        keyframes = []
+        mid_point = self.duration_ticks // 2
+        
+        # Jump up
+        keyframes.append({"timestamp": 0, "position.y": 0})
+        keyframes.append({"timestamp": mid_point // 2, "position.y": height})
+        # Land
+        keyframes.append({"timestamp": mid_point, "position.y": 0})
+        keyframes.append({"timestamp": self.duration_ticks - 1, "position.y": 0})
+        
+        self.keyframes[body_part] = keyframes
+        return self
+    
+    def add_rotation_loop(self, body_part, axis="rotation.z", max_angle=360):
+        """Generate continuous rotation"""
+        keyframes = []
+        
+        for tick in range(0, self.duration_ticks, 5):
+            progress = tick / self.duration_ticks
+            angle = progress * max_angle
+            
+            keyframe = {
+                "timestamp": tick,
+                axis: angle
+            }
+            keyframes.append(keyframe)
+        
+        self.keyframes[body_part] = keyframes
+        return self
+    
+    def add_idle_animation(self, body_part, axis="rotation.x", amplitude=5):
+        """Generate subtle idle bobbing"""
+        keyframes = []
+        
+        for tick in range(0, self.duration_ticks, 20):
+            progress = (tick / self.duration_ticks) % 1
+            angle = math.sin(progress * math.pi * 2) * amplitude
+            
+            keyframe = {
+                "timestamp": tick,
+                axis: angle
+            }
+            keyframes.append(keyframe)
+        
+        self.keyframes[body_part] = keyframes
+        return self
+    
+    def export_for_blockbench(self):
+        """Export animation data in Blockbench-compatible format"""
+        animation_data = {
+            "format_version": "1.8.0",
+            "animations": {
+                self.animation_name: {
+                    "loop": True,
+                    "animation_length": self.duration_ticks / 20,  # Convert to seconds
+                    "bones": {}
+                }
+            }
+        }
+        
+        for bone_name, keyframes in self.keyframes.items():
+            animation_data["animations"][self.animation_name]["bones"][bone_name] = {
+                "rotation": [],
+                "position": []
+            }
+            
+            for kf in keyframes:
+                timestamp = kf.get("timestamp", 0)
+                if "rotation.x" in kf or "rotation.y" in kf or "rotation.z" in kf:
+                    animation_data["animations"][self.animation_name]["bones"][bone_name]["rotation"].append({
+                        "timestamp": timestamp / 20,
+                        "dataPoints": [
+                            kf.get("rotation.x", 0),
+                            kf.get("rotation.y", 0),
+                            kf.get("rotation.z", 0)
+                        ]
+                    })
+        
+        return animation_data
+    
+    def save_json(self, filename):
+        """Save animation as JSON file"""
+        data = self.export_for_blockbench()
+        with open(filename, 'w') as f:
+            json.dump(data, f, indent=2)
+        print(f"✓ Animation saved to {filename}")
+
+# Example Usage
+if __name__ == "__main__":
+    # Create an 8-minute (9600 ticks) walking animation
+    animator = MinecraftAnimationGenerator("walk_cycle", 9600)
+    
+    # Add animations for different body parts
+    animator.add_walking_cycle("leftArm", "rotation.x")
+    animator.add_walking_cycle("rightArm", "rotation.x")
+    animator.add_walking_cycle("leftLeg", "rotation.x")
+    animator.add_walking_cycle("rightLeg", "rotation.x")
+    animator.add_idle_animation("head", "rotation.y", amplitude=3)
+    
+    # Export to JSON
+    animator.save_json("minecraft_walk_animation.json")
+    
+    # You can now import this JSON into Blockbench!
+    print("\n✓ Animation ready for Blockbench import!")
