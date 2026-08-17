@@ -1,0 +1,104 @@
+--- docs/animations/walk_cycle.json (原始)
+
+
++++ docs/animations/walk_cycle.json (修改后)
+{
+  "format_version": "1.8.0",
+  "scene": {
+    "background": {
+      "theme": "forest",
+      "color": [
+        "#14532d",
+        "#22c55e",
+        "#bef264"
+      ],
+      "lighting": "soft"
+    }
+  },
+  "animations": {
+    "walk_cycle": {
+      "loop": true,
+      "animation_length": 2,
+      "bones": {
+        "body": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "head": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                -10
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                10
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                2
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                -2
+              ]
+            }
+          ],
+          "position": []
+        }
+      }
+    }
+  }
+}

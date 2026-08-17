@@ -1,0 +1,264 @@
+--- output/minecraft_pose_pack_preview.html (原始)
+
+
++++ output/minecraft_pose_pack_preview.html (修改后)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>minecraft_pose_pack - Preview</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --border: #30363d;
+      --accent: #58a6ff;
+      --text: #c9d1d9;
+      --success: #3fb950;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    h1 { font-size: 24px; color: var(--accent); }
+    .container {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 20px;
+      padding: 20px 40px;
+    }
+    .preview-area {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 500px;
+      position: relative;
+    }
+    .video-placeholder {
+      text-align: center;
+      padding: 40px;
+    }
+    .video-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+    .controls {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      transition: opacity 0.2s;
+    }
+    .btn:hover { opacity: 0.9; }
+    .btn.success { background: var(--success); }
+    .btn.secondary { background: #8b949e; }
+    .info-box {
+      background: rgba(88, 166, 255, 0.1);
+      border: 1px solid var(--accent);
+      border-radius: 6px;
+      padding: 16px;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-row:last-child { border-bottom: none; }
+    .timeline-viz {
+      background: #0d1117;
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 10px;
+    }
+    .timeline-bar {
+      height: 8px;
+      background: linear-gradient(90deg, var(--accent), #a371f7);
+      border-radius: 4px;
+      width: 100%;
+    }
+    footer {
+      background: var(--panel);
+      border-top: 1px solid var(--border);
+      padding: 20px 40px;
+      text-align: center;
+      font-size: 13px;
+      color: #8b949e;
+    }
+    .download-section {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .tutorial-links {
+      margin-top: 16px;
+      font-size: 12px;
+    }
+    .tutorial-links a {
+      color: var(--accent);
+      text-decoration: none;
+      display: block;
+      margin: 4px 0;
+    }
+    .tutorial-links a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎬 minecraft_pose_pack</h1>
+    <div style="font-size: 14px; color: #8b949e;">Duration: 480s</div>
+  </header>
+
+  <div class="container">
+    <div class="preview-area">
+      <div class="video-placeholder">
+        <div class="video-icon">🎥</div>
+        <h2 style="margin-bottom: 12px;">Animation Preview</h2>
+        <p style="color: #8b949e; margin-bottom: 20px;">
+          Import the Blockbench file to view the full animation<br>
+          or use the Replay Mod in Minecraft for recording
+        </p>
+        <button class="btn" onclick="downloadBlockbenchFile()">
+          📥 Download Blockbench File
+        </button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="info-box">
+        <strong>📊 Animation Stats</strong>
+        <div class="stat-row">
+          <span>Duration:</span>
+          <span>480 seconds</span>
+        </div>
+        <div class="stat-row">
+          <span>Ticks:</span>
+          <span>9600</span>
+        </div>
+        <div class="stat-row">
+          <span>Bones:</span>
+          <span>6</span>
+        </div>
+        <div class="stat-row">
+          <span>Theme:</span>
+          <span>sunset</span>
+        </div>
+      </div>
+
+      <div class="timeline-viz">
+        <div style="font-size: 12px; margin-bottom: 8px; color: #8b949e;">Timeline</div>
+        <div class="timeline-bar"></div>
+      </div>
+
+      <button class="btn success" onclick="exportForYoutube()">
+        📺 Prepare for YouTube Upload
+      </button>
+
+      <button class="btn secondary" onclick="openInCapCut()">
+        🎙️ Edit Voice-over in CapCut
+      </button>
+
+      <div class="download-section">
+        <strong style="font-size: 14px;">📚 Recommended Tutorials</strong>
+        <div class="tutorial-links">
+          <a href="https://www.youtube.com/watch?v=7nZx5hqr_1s" target="_blank">• Blockbench Interface & All Basics</a><a href="https://www.youtube.com/playlist?list=PLrWjVKfHhzR8K9N0cJvPzGqQ5K8F9X3Yz" target="_blank">• ArtsByKev Beginner Playlist</a>
+          <a href="https://www.youtube.com/watch?v=0NnmJVoy2Qc" target="_blank">• Customizable Player Models Guide</a><a href="https://www.youtube.com/watch?v=OdZlKpLOkj4" target="_blank">• Minecraft Entity Wizard Walkthrough</a><a href="https://www.youtube.com/results?search_query=Replay+Mod+Masterclass+Minecraft" target="_blank">• Replay Mod Masterclass Video</a><a href="https://www.youtube.com/results?search_query=Minecraft+filmmaking+guide" target="_blank">• Minecraft Filmmaking Guide</a><a href="https://www.youtube.com/results?search_query=Minecraft+video+editing+tutorial" target="_blank">• Minecraft Video Editing Tutorial</a>
+        </div>
+      </div>
+
+      <div class="info-box" style="margin-top: 16px; background: rgba(63, 185, 80, 0.1); border-color: var(--success);">
+        <strong>✅ Next Steps:</strong>
+        <ol style="margin: 10px 0 0 20px; font-size: 12px; line-height: 1.8;">
+          <li>Download the Blockbench file</li>
+          <li>Import into Blockbench to preview</li>
+          <li>Use Minecraft Replay Mod to record</li>
+          <li>Edit in CapCut for voice-over</li>
+          <li>Upload to YouTube</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Generated by Minecraft Animation Generator • Ready for Blockbench import
+  </footer>
+
+  <script>
+    const animationData = {"format_version":"1.8.0","scene":{"background":{"theme":"sunset","color":["#f97316","#fb7185","#facc15"],"lighting":"soft"}},"animations":{"minecraft_pose_pack":{"loop":true,"animation_length":480,"bones":{"leftArm":{"rotation":[{"time":0,"angle":[25,0,-55]},{"time":479.95,"angle":[25,0,-55]}],"position":[]},"rightArm":{"rotation":[{"time":0,"angle":[-25,0,55]},{"time":479.95,"angle":[-25,0,55]}],"position":[]},"leftLeg":{"rotation":[{"time":0,"angle":[35,0,-20]},{"time":479.95,"angle":[35,0,-20]}],"position":[]},"rightLeg":{"rotation":[{"time":0,"angle":[-25,0,20]},{"time":479.95,"angle":[-25,0,20]}],"position":[]},"head":{"rotation":[{"time":0,"angle":[0,0,0]},{"time":1,"angle":[0,0.03926878671403332,0]},{"time":2,"angle":[0,0.07853084492361945,0]},{"time":3,"angle":[0,0.11777944727720582,0]},{"time":4,"angle":[0,0.1570078687288315,0]},{"time":5,"angle":[0,0.19620938769042917,0]},{"time":6,"angle":[0,0.23537728718353484,0]},{"time":7,"angle":[0,0.27450485599020713,0]},{"time":8,"angle":[0,0.31358538980296036,0]},{"time":9,"angle":[0,0.35261219237351293,0]},{"time":10,"angle":[0,0.3915785766601547,0]},{"time":11,"angle":[0,0.4304778659735379,0]},{"time":12,"angle":[0,0.46930339512069263,0]},{"time":13,"angle":[0,0.5080485115470739,0]},{"time":14,"angle":[0,0.5467065764764424,0]},{"time":15,"angle":[0,0.5852709660483848,0]},{"time":16,"angle":[0,0.623735072453278,0]},{"time":17,"angle":[0,0.6620923050645032,0]},{"time":18,"angle":[0,0.7003360915677161,0]},{"time":19,"angle":[0,0.7384598790869791,0]},{"time":20,"angle":[0,0.7764571353075622,0]},{"time":21,"angle":[0,0.8143213495952228,0]},{"time":22,"angle":[0,0.8520460341117677,0]},{"time":23,"angle":[0,0.889624724926713,0]},{"time":24,"angle":[0,0.9270509831248421,0]},{"time":25,"angle":[0,0.9643183959094848,0]},{"time":26,"angle":[0,1.001420577701313,0]},{"time":27,"angle":[0,1.0383511712324789,0]},{"time":28,"angle":[0,1.0751038486359008,0]},{"time":29,"angle":[0,1.1116723125295087,0]},{"time":30,"angle":[0,1.1480502970952693,0]},{"time":31,"angle":[0,1.1842315691528018,0]},{"time":32,"angle":[0,1.2202099292274005,0]},{"time":33,"angle":[0,1.2559792126122844,0]},{"time":34,"angle":[0,1.2915332904248853,0]},{"time":35,"angle":[0,1.326866070657004,0]},{"time":36,"angle":[0,1.3619714992186402,0]},{"time":37,"angle":[0,1.3968435609753342,0]},{"time":38,"angle":[0,1.4314762807788253,0]},{"time":39,"angle":[0,1.4658637244908648,0]},{"time":40,"angle":[0,1.4999999999999998,0]},{"time":41,"angle":[0,1.5338792582311565,0]},{"time":42,"angle":[0,1.5674956941478464,0]},{"time":43,"angle":[0,1.6008435477468343,0]},{"time":44,"angle":[0,1.633917105045081,0]},{"time":45,"angle":[0,1.6667106990588065,0]},{"time":46,"angle":[0,1.6992187107744985,0]},{"time":47,"angle":[0,1.7314355701117008,0]},{"time":48,"angle":[0,1.7633557568774194,0]},{"time":49,"angle":[0,1.7949738017119772,0]},{"time":50,"angle":[0,1.826284287026162,0]},{"time":51,"angle":[0,1.857281847929502,0]},{"time":52,"angle":[0,1.8879611731495125,0]},{"time":53,"angle":[0,1.918317005941754,0]},{"time":54,"angle":[0,1.948344144990551,0]},{"time":55,"angle":[0,1.9780374453002065,0]},{"time":56,"angle":[0,2.0073918190765747,0]},{"time":57,"angle":[0,2.036402236598825,0]},{"time":58,"angle":[0,2.0650637270812617,0]},{"time":59,"angle":[0,2.09337137952504,0]},{"time":60,"angle":[0,2.1213203435596424,0]},{"time":61,"angle":[0,2.1489058302739625,0]},{"time":62,"angle":[0,2.176123113036863,0]},{"time":63,"angle":[0,2.202967528307057,0]},{"time":64,"angle":[0,2.229434476432183,0]},{"time":65,"angle":[0,2.2555194224369317,0]},{"time":66,"angle":[0,2.281217896800093,0]},{"time":67,"angle":[0,2.3065254962203787,0]},{"time":68,"angle":[0,2.3314378843709123,0]},{"time":69,"angle":[0,2.3559507926422345,0]},{"time":70,"angle":[0,2.3800600208737057,0]},{"time":71,"angle":[0,2.403761438073182,0]},{"time":72,"angle":[0,2.4270509831248424,0]},{"time":73,"angle":[0,2.4499246654850366,0]},{"time":74,"angle":[0,2.4723785658660473,0]},{"time":75,"angle":[0,2.4944088369076356,0]},{"time":76,"angle":[0,2.5160117038362717,0]},{"time":77,"angle":[0,2.53718346511192,0]},{"time":78,"angle":[0,2.5579204930622765,0]},{"time":79,"angle":[0,2.578219234504358,0]},{"time":80,"angle":[0,2.598076211353316,0]},{"time":81,"angle":[0,2.6174880212183913,0]},{"time":82,"angle":[0,2.6364513379858963,0]},{"time":83,"angle":[0,2.6549629123891254,0]},{"time":84,"angle":[0,2.6730195725651034,0]},{"time":85,"angle":[0,2.690618224598065,0]},{"time":86,"angle":[0,2.7077558530495818,0]},{"time":87,"angle":[0,2.7244295214752436,0]},{"time":88,"angle":[0,2.7406363729278027,0]},{"time":89,"angle":[0,2.756373630446695,0]},{"time":90,"angle":[0,2.77163859753386,0]},{"time":91,"angle":[0,2.7864286586157725,0]},{"time":92,"angle":[0,2.8007412794916053,0]},{"time":93,"angle":[0,2.8145740077674524,0]},{"time":94,"angle":[0,2.827924473276535,0]},{"time":95,"angle":[0,2.840790388485317,0]},{"time":96,"angle":[0,2.8531695488854605,0]},{"time":97,"angle":[0,2.86505983337156,0]},{"time":98,"angle":[0,2.876459204604579,0]},{"time":99,"angle":[0,2.887365709360942,0]},{"time":100,"angle":[0,2.897777478867205,0]},{"time":101,"angle":[0,2.907692729120263,0]},{"time":102,"angle":[0,2.9171097611930294,0]},{"time":103,"angle":[0,2.926026961525538,0]},{"time":104,"angle":[0,2.934442802201417,0]},{"time":105,"angle":[0,2.9423558412096913,0]},{"time":106,"angle":[0,2.9497647226918637,0]},{"time":107,"angle":[0,2.956668177174233,0]},{"time":108,"angle":[0,2.9630650217854133,0]},{"time":109,"angle":[0,2.9689541604590106,0]},{"time":110,"angle":[0,2.974334584121431,0]},{"time":111,"angle":[0,2.9792053708647788,0]},{"time":112,"angle":[0,2.9835656861048196,0]},{"time":113,"angle":[0,2.9874147827239854,0]},{"time":114,"angle":[0,2.990752001199384,0]},{"time":115,"angle":[0,2.99357676971581,0]},{"time":116,"angle":[0,2.9958886042637216,0]},{"time":117,"angle":[0,2.9976871087221686,0]},{"time":118,"angle":[0,2.998971974926672,0]},{"time":119,"angle":[0,2.999742982722021,0]},{"time":120,"angle":[0,3,0]},{"time":121,"angle":[0,2.999742982722021,0]},{"time":122,"angle":[0,2.998971974926672,0]},{"time":123,"angle":[0,2.9976871087221686,0]},{"time":124,"angle":[0,2.9958886042637216,0]},{"time":125,"angle":[0,2.99357676971581,0]},{"time":126,"angle":[0,2.990752001199384,0]},{"time":127,"angle":[0,2.9874147827239854,0]},{"time":128,"angle":[0,2.98356568610482,0]},{"time":129,"angle":[0,2.9792053708647788,0]},{"time":130,"angle":[0,2.9743345841214315,0]},{"time":131,"angle":[0,2.9689541604590106,0]},{"time":132,"angle":[0,2.963065021785413,0]},{"time":133,"angle":[0,2.956668177174233,0]},{"time":134,"angle":[0,2.9497647226918637,0]},{"time":135,"angle":[0,2.9423558412096913,0]},{"time":136,"angle":[0,2.934442802201417,0]},{"time":137,"angle":[0,2.9260269615255385,0]},{"time":138,"angle":[0,2.91710976119303,0]},{"time":139,"angle":[0,2.907692729120263,0]},{"time":140,"angle":[0,2.897777478867205,0]},{"time":141,"angle":[0,2.887365709360942,0]},{"time":142,"angle":[0,2.876459204604579,0]},{"time":143,"angle":[0,2.86505983337156,0]},{"time":144,"angle":[0,2.853169548885461,0]},{"time":145,"angle":[0,2.840790388485317,0]},{"time":146,"angle":[0,2.827924473276535,0]},{"time":147,"angle":[0,2.814574007767452,0]},{"time":148,"angle":[0,2.8007412794916053,0]},{"time":149,"angle":[0,2.7864286586157725,0]},{"time":150,"angle":[0,2.77163859753386,0]},{"time":151,"angle":[0,2.7563736304466953,0]},{"time":152,"angle":[0,2.7406363729278027,0]},{"time":153,"angle":[0,2.724429521475244,0]},{"time":154,"angle":[0,2.7077558530495818,0]},{"time":155,"angle":[0,2.690618224598065,0]},{"time":156,"angle":[0,2.673019572565104,0]},{"time":157,"angle":[0,2.6549629123891254,0]},{"time":158,"angle":[0,2.6364513379858963,0]},{"time":159,"angle":[0,2.6174880212183917,0]},{"time":160,"angle":[0,2.598076211353316,0]},{"time":161,"angle":[0,2.5782192345043584,0]},{"time":162,"angle":[0,2.557920493062277,0]},{"time":163,"angle":[0,2.5371834651119194,0]},{"time":164,"angle":[0,2.516011703836272,0]},{"time":165,"angle":[0,2.494408836907636,0]},{"time":166,"angle":[0,2.4723785658660473,0]},{"time":167,"angle":[0,2.449924665485037,0]},{"time":168,"angle":[0,2.4270509831248424,0]},{"time":169,"angle":[0,2.403761438073182,0]},{"time":170,"angle":[0,2.3800600208737057,0]},{"time":171,"angle":[0,2.3559507926422345,0]},{"time":172,"angle":[0,2.331437884370913,0]},{"time":173,"angle":[0,2.3065254962203787,0]},{"time":174,"angle":[0,2.281217896800093,0]},{"time":175,"angle":[0,2.255519422436932,0]},{"time":176,"angle":[0,2.2294344764321834,0]},{"time":177,"angle":[0,2.2029675283070564,0]},{"time":178,"angle":[0,2.1761231130368626,0]},{"time":179,"angle":[0,2.148905830273963,0]},{"time":180,"angle":[0,2.121320343559643,0]},{"time":181,"angle":[0,2.0933713795250406,0]},{"time":182,"angle":[0,2.0650637270812626,0]},{"time":183,"angle":[0,2.036402236598826,0]},{"time":184,"angle":[0,2.007391819076574,0]},{"time":185,"angle":[0,1.978037445300207,0]},{"time":186,"angle":[0,1.9483441449905512,0]},{"time":187,"angle":[0,1.9183170059417542,0]},{"time":188,"angle":[0,1.8879611731495123,0]},{"time":189,"angle":[0,1.8572818479295026,0]},{"time":190,"angle":[0,1.8262842870261626,0]},{"time":191,"angle":[0,1.7949738017119774,0]},{"time":192,"angle":[0,1.7633557568774196,0]},{"time":193,"angle":[0,1.7314355701117008,0]},{"time":194,"angle":[0,1.6992187107744985,0]},{"time":195,"angle":[0,1.6667106990588065,0]},{"time":196,"angle":[0,1.6339171050450818,0]},{"time":197,"angle":[0,1.6008435477468352,0]},{"time":198,"angle":[0,1.5674956941478468,0]},{"time":199,"angle":[0,1.5338792582311565,0]},{"time":200,"angle":[0,1.4999999999999998,0]},{"time":201,"angle":[0,1.4658637244908646,0]},{"time":202,"angle":[0,1.431476280778826,0]},{"time":203,"angle":[0,1.3968435609753347,0]},{"time":204,"angle":[0,1.3619714992186407,0]},{"time":205,"angle":[0,1.326866070657004,0]},{"time":206,"angle":[0,1.2915332904248866,0]},{"time":207,"angle":[0,1.255979212612284,0]},{"time":208,"angle":[0,1.2202099292274,0]},{"time":209,"angle":[0,1.1842315691528023,0]},{"time":210,"angle":[0,1.1480502970952697,0]},{"time":211,"angle":[0,1.111672312529509,0]},{"time":212,"angle":[0,1.075103848635902,0]},{"time":213,"angle":[0,1.0383511712324798,0]},{"time":214,"angle":[0,1.001420577701312,0]},{"time":215,"angle":[0,0.9643183959094852,0]},{"time":216,"angle":[0,0.9270509831248426,0]},{"time":217,"angle":[0,0.889624724926713,0]},{"time":218,"angle":[0,0.8520460341117677,0]},{"time":219,"angle":[0,0.8143213495952237,0]},{"time":220,"angle":[0,0.7764571353075631,0]},{"time":221,"angle":[0,0.7384598790869796,0]},{"time":222,"angle":[0,0.7003360915677166,0]},{"time":223,"angle":[0,0.6620923050645033,0]},{"time":224,"angle":[0,0.623735072453278,0]},{"time":225,"angle":[0,0.5852709660483858,0]},{"time":226,"angle":[0,0.5467065764764432,0]},{"time":227,"angle":[0,0.5080485115470744,0]},{"time":228,"angle":[0,0.46930339512069297,0]},{"time":229,"angle":[0,0.43047786597353804,0]},{"time":230,"angle":[0,0.3915785766601547,0]},{"time":231,"angle":[0,0.35261219237351266,0]},{"time":232,"angle":[0,0.3135853898029612,0]},{"time":233,"angle":[0,0.27450485599020774,0]},{"time":234,"angle":[0,0.2353772871835352,0]},{"time":235,"angle":[0,0.19620938769042934,0]},{"time":236,"angle":[0,0.15700786872883277,0]},{"time":237,"angle":[0,0.11777944727720552,0]},{"time":238,"angle":[0,0.07853084492361893,0]},{"time":239,"angle":[0,0.03926878671403391,0]},{"time":240,"angle":[0,3.6739403974420594e-16,0]},{"time":241,"angle":[0,-0.03926878671403317,0]},{"time":242,"angle":[0,-0.0785308449236182,0]},{"time":243,"angle":[0,-0.1177794472772048,0]},{"time":244,"angle":[0,-0.15700786872883069,0]},{"time":245,"angle":[0,-0.19620938769042862,0]},{"time":246,"angle":[0,-0.23537728718353312,0]},{"time":247,"angle":[0,-0.2745048559902057,0]},{"time":248,"angle":[0,-0.31358538980296047,0]},{"time":249,"angle":[0,-0.3526121923735132,0]},{"time":250,"angle":[0,-0.3915785766601553,0]},{"time":251,"angle":[0,-0.43047786597353865,0]},{"time":252,"angle":[0,-0.4693033951206922,0]},{"time":253,"angle":[0,-0.5080485115470736,0]},{"time":254,"angle":[0,-0.5467065764764424,0]},{"time":255,"angle":[0,-0.585270966048385,0]},{"time":256,"angle":[0,-0.6237350724532772,0]},{"time":257,"angle":[0,-0.6620923050645027,0]},{"time":258,"angle":[0,-0.7003360915677158,0]},{"time":259,"angle":[0,-0.7384598790869776,0]},{"time":260,"angle":[0,-0.7764571353075611,0]},{"time":261,"angle":[0,-0.8143213495952217,0]},{"time":262,"angle":[0,-0.852046034111767,0]},{"time":263,"angle":[0,-0.8896247249267135,0]},{"time":264,"angle":[0,-0.9270509831248432,0]},{"time":265,"angle":[0,-0.9643183959094845,0]},{"time":266,"angle":[0,-1.001420577701313,0]},{"time":267,"angle":[0,-1.0383511712324793,0]},{"time":268,"angle":[0,-1.0751038486359012,0]},{"time":269,"angle":[0,-1.111672312529508,0]},{"time":270,"angle":[0,-1.148050297095269,0]},{"time":271,"angle":[0,-1.1842315691528016,0]},{"time":272,"angle":[0,-1.2202099292273996,0]},{"time":273,"angle":[0,-1.2559792126122833,0]},{"time":274,"angle":[0,-1.2915332904248849,0]},{"time":275,"angle":[0,-1.3268660706570032,0]},{"time":276,"angle":[0,-1.3619714992186387,0]},{"time":277,"angle":[0,-1.396843560975333,0]},{"time":278,"angle":[0,-1.4314762807788253,0]},{"time":279,"angle":[0,-1.465863724490865,0]},{"time":280,"angle":[0,-1.5000000000000004,0]},{"time":281,"angle":[0,-1.5338792582311567,0]},{"time":282,"angle":[0,-1.567495694147846,0]},{"time":283,"angle":[0,-1.6008435477468343,0]},{"time":284,"angle":[0,-1.6339171050450814,0]},{"time":285,"angle":[0,-1.6667106990588059,0]},{"time":286,"angle":[0,-1.6992187107744978,0]},{"time":287,"angle":[0,-1.7314355701117004,0]},{"time":288,"angle":[0,-1.7633557568774192,0]},{"time":289,"angle":[0,-1.7949738017119758,0]},{"time":290,"angle":[0,-1.8262842870261609,0]},{"time":291,"angle":[0,-1.8572818479295012,0]},{"time":292,"angle":[0,-1.8879611731495118,0]},{"time":293,"angle":[0,-1.9183170059417547,0]},{"time":294,"angle":[0,-1.9483441449905516,0]},{"time":295,"angle":[0,-1.9780374453002065,0]},{"time":296,"angle":[0,-2.0073918190765747,0]},{"time":297,"angle":[0,-2.0364022365988252,0]},{"time":298,"angle":[0,-2.065063727081262,0]},{"time":299,"angle":[0,-2.09337137952504,0]},{"time":300,"angle":[0,-2.1213203435596424,0]},{"time":301,"angle":[0,-2.1489058302739625,0]},{"time":302,"angle":[0,-2.176123113036862,0]},{"time":303,"angle":[0,-2.202967528307056,0]},{"time":304,"angle":[0,-2.229434476432182,0]},{"time":305,"angle":[0,-2.2555194224369317,0]},{"time":306,"angle":[0,-2.281217896800092,0]},{"time":307,"angle":[0,-2.3065254962203774,0]},{"time":308,"angle":[0,-2.3314378843709136,0]},{"time":309,"angle":[0,-2.355950792642236,0]},{"time":310,"angle":[0,-2.380060020873705,0]},{"time":311,"angle":[0,-2.4037614380731815,0]},{"time":312,"angle":[0,-2.427050983124842,0]},{"time":313,"angle":[0,-2.4499246654850366,0]},{"time":314,"angle":[0,-2.4723785658660473,0]},{"time":315,"angle":[0,-2.4944088369076356,0]},{"time":316,"angle":[0,-2.516011703836272,0]},{"time":317,"angle":[0,-2.5371834651119185,0]},{"time":318,"angle":[0,-2.5579204930622756,0]},{"time":319,"angle":[0,-2.578219234504357,0]},{"time":320,"angle":[0,-2.5980762113533156,0]},{"time":321,"angle":[0,-2.617488021218391,0]},{"time":322,"angle":[0,-2.636451337985896,0]},{"time":323,"angle":[0,-2.6549629123891254,0]},{"time":324,"angle":[0,-2.6730195725651034,0]},{"time":325,"angle":[0,-2.6906182245980648,0]},{"time":326,"angle":[0,-2.7077558530495818,0]},{"time":327,"angle":[0,-2.724429521475244,0]},{"time":328,"angle":[0,-2.7406363729278027,0]},{"time":329,"angle":[0,-2.7563736304466953,0]},{"time":330,"angle":[0,-2.7716385975338595,0]},{"time":331,"angle":[0,-2.786428658615772,0]},{"time":332,"angle":[0,-2.800741279491605,0]},{"time":333,"angle":[0,-2.814574007767452,0]},{"time":334,"angle":[0,-2.8279244732765347,0]},{"time":335,"angle":[0,-2.840790388485317,0]},{"time":336,"angle":[0,-2.8531695488854605,0]},{"time":337,"angle":[0,-2.86505983337156,0]},{"time":338,"angle":[0,-2.876459204604579,0]},{"time":339,"angle":[0,-2.887365709360942,0]},{"time":340,"angle":[0,-2.897777478867205,0]},{"time":341,"angle":[0,-2.907692729120263,0]},{"time":342,"angle":[0,-2.91710976119303,0]},{"time":343,"angle":[0,-2.9260269615255385,0]},{"time":344,"angle":[0,-2.9344428022014166,0]},{"time":345,"angle":[0,-2.942355841209691,0]},{"time":346,"angle":[0,-2.9497647226918637,0]},{"time":347,"angle":[0,-2.956668177174233,0]},{"time":348,"angle":[0,-2.963065021785413,0]},{"time":349,"angle":[0,-2.9689541604590106,0]},{"time":350,"angle":[0,-2.974334584121431,0]},{"time":351,"angle":[0,-2.9792053708647783,0]},{"time":352,"angle":[0,-2.9835656861048196,0]},{"time":353,"angle":[0,-2.9874147827239854,0]},{"time":354,"angle":[0,-2.990752001199384,0]},{"time":355,"angle":[0,-2.99357676971581,0]},{"time":356,"angle":[0,-2.9958886042637216,0]},{"time":357,"angle":[0,-2.9976871087221686,0]},{"time":358,"angle":[0,-2.998971974926672,0]},{"time":359,"angle":[0,-2.999742982722021,0]},{"time":360,"angle":[0,-3,0]},{"time":361,"angle":[0,-2.999742982722021,0]},{"time":362,"angle":[0,-2.998971974926672,0]},{"time":363,"angle":[0,-2.9976871087221686,0]},{"time":364,"angle":[0,-2.9958886042637216,0]},{"time":365,"angle":[0,-2.9935767697158107,0]},{"time":366,"angle":[0,-2.9907520011993842,0]},{"time":367,"angle":[0,-2.9874147827239854,0]},{"time":368,"angle":[0,-2.9835656861048196,0]},{"time":369,"angle":[0,-2.9792053708647788,0]},{"time":370,"angle":[0,-2.9743345841214315,0]},{"time":371,"angle":[0,-2.9689541604590106,0]},{"time":372,"angle":[0,-2.9630650217854133,0]},{"time":373,"angle":[0,-2.956668177174233,0]},{"time":374,"angle":[0,-2.9497647226918637,0]},{"time":375,"angle":[0,-2.9423558412096913,0]},{"time":376,"angle":[0,-2.9344428022014166,0]},{"time":377,"angle":[0,-2.9260269615255385,0]},{"time":378,"angle":[0,-2.9171097611930303,0]},{"time":379,"angle":[0,-2.9076927291202637,0]},{"time":380,"angle":[0,-2.897777478867205,0]},{"time":381,"angle":[0,-2.8873657093609424,0]},{"time":382,"angle":[0,-2.8764592046045796,0]},{"time":383,"angle":[0,-2.8650598333715602,0]},{"time":384,"angle":[0,-2.853169548885461,0]},{"time":385,"angle":[0,-2.840790388485317,0]},{"time":386,"angle":[0,-2.827924473276535,0]},{"time":387,"angle":[0,-2.8145740077674524,0]},{"time":388,"angle":[0,-2.8007412794916053,0]},{"time":389,"angle":[0,-2.7864286586157725,0]},{"time":390,"angle":[0,-2.77163859753386,0]},{"time":391,"angle":[0,-2.7563736304466957,0]},{"time":392,"angle":[0,-2.740636372927803,0]},{"time":393,"angle":[0,-2.7244295214752445,0]},{"time":394,"angle":[0,-2.707755853049582,0]},{"time":395,"angle":[0,-2.690618224598065,0]},{"time":396,"angle":[0,-2.673019572565104,0]},{"time":397,"angle":[0,-2.6549629123891254,0]},{"time":398,"angle":[0,-2.6364513379858963,0]},{"time":399,"angle":[0,-2.6174880212183913,0]},{"time":400,"angle":[0,-2.598076211353316,0]},{"time":401,"angle":[0,-2.578219234504358,0]},{"time":402,"angle":[0,-2.557920493062276,0]},{"time":403,"angle":[0,-2.5371834651119194,0]},{"time":404,"angle":[0,-2.5160117038362726,0]},{"time":405,"angle":[0,-2.4944088369076365,0]},{"time":406,"angle":[0,-2.4723785658660473,0]},{"time":407,"angle":[0,-2.449924665485037,0]},{"time":408,"angle":[0,-2.427050983124843,0]},{"time":409,"angle":[0,-2.403761438073182,0]},{"time":410,"angle":[0,-2.3800600208737057,0]},{"time":411,"angle":[0,-2.3559507926422363,0]},{"time":412,"angle":[0,-2.331437884370914,0]},{"time":413,"angle":[0,-2.3065254962203783,0]},{"time":414,"angle":[0,-2.2812178968000927,0]},{"time":415,"angle":[0,-2.2555194224369313,0]},{"time":416,"angle":[0,-2.229434476432182,0]},{"time":417,"angle":[0,-2.2029675283070573,0]},{"time":418,"angle":[0,-2.176123113036864,0]},{"time":419,"angle":[0,-2.1489058302739634,0]},{"time":420,"angle":[0,-2.121320343559643,0]},{"time":421,"angle":[0,-2.0933713795250406,0]},{"time":422,"angle":[0,-2.065063727081262,0]},{"time":423,"angle":[0,-2.036402236598825,0]},{"time":424,"angle":[0,-2.0073918190765765,0]},{"time":425,"angle":[0,-1.9780374453002083,0]},{"time":426,"angle":[0,-1.9483441449905523,0]},{"time":427,"angle":[0,-1.9183170059417556,0]},{"time":428,"angle":[0,-1.8879611731495114,0]},{"time":429,"angle":[0,-1.8572818479295008,0]},{"time":430,"angle":[0,-1.8262842870261626,0]},{"time":431,"angle":[0,-1.7949738017119778,0]},{"time":432,"angle":[0,-1.76335575687742,0]},{"time":433,"angle":[0,-1.7314355701117012,0]},{"time":434,"angle":[0,-1.699218710774499,0]},{"time":435,"angle":[0,-1.6667106990588065,0]},{"time":436,"angle":[0,-1.633917105045081,0]},{"time":437,"angle":[0,-1.6008435477468366,0]},{"time":438,"angle":[0,-1.5674956941478484,0]},{"time":439,"angle":[0,-1.5338792582311578,0]},{"time":440,"angle":[0,-1.5000000000000013,0]},{"time":441,"angle":[0,-1.465863724490866,0]},{"time":442,"angle":[0,-1.4314762807788262,0]},{"time":443,"angle":[0,-1.3968435609753351,0]},{"time":444,"angle":[0,-1.361971499218641,0]},{"time":445,"angle":[0,-1.3268660706570041,0]},{"time":446,"angle":[0,-1.2915332904248855,0]},{"time":447,"angle":[0,-1.2559792126122842,0]},{"time":448,"angle":[0,-1.2202099292274005,0]},{"time":449,"angle":[0,-1.1842315691528014,0]},{"time":450,"angle":[0,-1.148050297095271,0]},{"time":451,"angle":[0,-1.1116723125295103,0]},{"time":452,"angle":[0,-1.0751038486359024,0]},{"time":453,"angle":[0,-1.0383511712324802,0]},{"time":454,"angle":[0,-1.0014205777013139,0]},{"time":455,"angle":[0,-0.9643183959094856,0]},{"time":456,"angle":[0,-0.9270509831248428,0]},{"time":457,"angle":[0,-0.8896247249267133,0]},{"time":458,"angle":[0,-0.8520460341117682,0]},{"time":459,"angle":[0,-0.8143213495952228,0]},{"time":460,"angle":[0,-0.776457135307562,0]},{"time":461,"angle":[0,-0.7384598790869787,0]},{"time":462,"angle":[0,-0.7003360915677156,0]},{"time":463,"angle":[0,-0.6620923050645025,0]},{"time":464,"angle":[0,-0.6237350724532796,0]},{"time":465,"angle":[0,-0.5852709660483861,0]},{"time":466,"angle":[0,-0.5467065764764435,0]},{"time":467,"angle":[0,-0.5080485115470748,0]},{"time":468,"angle":[0,-0.46930339512069336,0]},{"time":469,"angle":[0,-0.4304778659735384,0]},{"time":470,"angle":[0,-0.39157857666015505,0]},{"time":471,"angle":[0,-0.35261219237351565,0]},{"time":472,"angle":[0,-0.3135853898029629,0]},{"time":473,"angle":[0,-0.2745048559902068,0]},{"time":474,"angle":[0,-0.23537728718353423,0]},{"time":475,"angle":[0,-0.1962093876904284,0]},{"time":476,"angle":[0,-0.15700786872883044,0]},{"time":477,"angle":[0,-0.11777944727720722,0]},{"time":478,"angle":[0,-0.07853084492362064,0]},{"time":479,"angle":[0,-0.039268786714034276,0]}],"position":[]},"body":{"rotation":[{"time":0,"angle":[5,0,18]},{"time":479.95,"angle":[5,0,18]}],"position":[]}}}}};
+    const animationName = 'minecraft_pose_pack';
+
+    function downloadBlockbenchFile() {
+      const blob = new Blob([JSON.stringify(animationData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = animationName + '.bbanimation';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    function exportForYoutube() {
+      alert('To upload to YouTube:\n\n' +
+            '1. Record your animation using Minecraft Replay Mod\n' +
+            '2. Export as MP4 (1080p or 4K)\n' +
+            '3. Go to YouTube Studio\n' +
+            '4. Click CREATE → Upload video\n' +
+            '5. Add title, description, tags\n' +
+            '6. Choose visibility and publish');
+    }
+
+    function openInCapCut() {
+      alert('To add voice-over in CapCut:\n\n' +
+            '1. Export your recorded animation as MP4\n' +
+            '2. Open CapCut (Desktop or Mobile)\n' +
+            '3. Import your video\n' +
+            '4. Click "Audio" → "Record" for voice-over\n' +
+            '5. Or use Text-to-Speech feature\n' +
+            '6. Adjust audio levels\n' +
+            '7. Export final video');
+    }
+
+    // Auto-download prompt on load
+    window.addEventListener('load', () => {
+      console.log('Animation preview loaded:', animationName);
+      console.log('Duration:', 480, 'seconds');
+      console.log('Bones animated:', Object.keys(animationData.animations[animationName].bones));
+    });
+  </script>
+</body>
+</html>

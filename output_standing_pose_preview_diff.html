@@ -1,0 +1,420 @@
+--- output/standing_pose_preview.html (原始)
+
+
++++ output/standing_pose_preview.html (修改后)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minecraft Animation Preview - Standing Pose</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #4f46e5, #a78bfa, #f8fafc);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 800px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    h1 {
+      color: #4f46e5;
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2rem;
+    }
+    .subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 30px;
+    }
+    .preview-box {
+      background: #f3f4f6;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .animation-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+    }
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      display: block;
+    }
+    .stat-label {
+      font-size: 0.875rem;
+      opacity: 0.9;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .btn {
+      padding: 18px 30px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #4f46e5, #7c3aed);
+      color: white;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(79, 70, 229, 0.4);
+    }
+    .btn-secondary {
+      background: linear-gradient(135deg, #ec4899, #f472b6);
+      color: white;
+    }
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(236, 72, 153, 0.4);
+    }
+    .btn-tertiary {
+      background: linear-gradient(135deg, #10b981, #34d399);
+      color: white;
+    }
+    .btn-tertiary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.4);
+    }
+    .info-section {
+      margin-top: 30px;
+      padding: 25px;
+      background: #f9fafb;
+      border-radius: 12px;
+      border-left: 4px solid #4f46e5;
+    }
+    .info-section h3 {
+      color: #4f46e5;
+      margin-bottom: 15px;
+    }
+    .info-section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    .info-section li {
+      padding: 8px 0;
+      color: #4b5563;
+      position: relative;
+      padding-left: 25px;
+    }
+    .info-section li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      color: #10b981;
+      font-weight: bold;
+    }
+    .bone-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 15px;
+      justify-content: center;
+    }
+    .bone-tag {
+      background: #e0e7ff;
+      color: #4f46e5;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .modal.active {
+      display: flex;
+    }
+    .modal-content {
+      background: white;
+      border-radius: 15px;
+      padding: 40px;
+      max-width: 700px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .modal-close {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 2rem;
+      cursor: pointer;
+      color: #6b7280;
+    }
+    .modal-close:hover {
+      color: #ef4444;
+    }
+    .step {
+      margin-bottom: 20px;
+    }
+    .step-number {
+      display: inline-block;
+      background: #4f46e5;
+      color: white;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 30px;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+    code {
+      background: #f3f4f6;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-family: 'Courier New', monospace;
+      color: #dc2626;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎬 Minecraft Animation Preview</h1>
+    <p class="subtitle">Standing Pose - Ready for Blockbench</p>
+
+    <div class="preview-box">
+      <h2 style="color: #4f46e5; margin-bottom: 15px;">Animation Overview</h2>
+      <p style="color: #6b7280; margin-bottom: 20px;">
+        A natural standing pose with slight arm and leg positioning for a relaxed character stance.
+        Perfect for cutscenes, intros, or idle animations.
+      </p>
+      <div class="bone-list">
+        <span class="bone-tag">body</span>
+        <span class="bone-tag">head</span>
+        <span class="bone-tag">leftArm</span>
+        <span class="bone-tag">rightArm</span>
+        <span class="bone-tag">leftLeg</span>
+        <span class="bone-tag">rightLeg</span>
+      </div>
+    </div>
+
+    <div class="animation-stats">
+      <div class="stat-card">
+        <span class="stat-value">6</span>
+        <span class="stat-label">Bones Animated</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">1.0s</span>
+        <span class="stat-label">Duration</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">Loop</span>
+        <span class="stat-label">Mode</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-value">20 FPS</span>
+        <span class="stat-label">Frame Rate</span>
+      </div>
+    </div>
+
+    <div class="button-group">
+      <a href="standing_pose.bbanimation" download class="btn btn-primary">
+        📥 Download Blockbench Animation File
+      </a>
+      <button onclick="openModal('youtubeModal')" class="btn btn-secondary">
+        📺 Upload to YouTube Guide
+      </button>
+      <button onclick="openModal('capcutModal')" class="btn btn-tertiary">
+        🎙️ Add Voice-Over in CapCut
+      </button>
+    </div>
+
+    <div class="info-section">
+      <h3>How to Use This Animation</h3>
+      <ul>
+        <li>Download the <code>.bbanimation</code> file above</li>
+        <li>Open Blockbench and load your Minecraft character model</li>
+        <li>Go to <strong>File → Import → Import Animation</strong></li>
+        <li>Select the downloaded file to apply the animation</li>
+        <li>Preview in Blockbench, then export as video or GIF</li>
+        <li>Upload to YouTube or edit further in CapCut</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- YouTube Modal -->
+  <div id="youtubeModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal('youtubeModal')">&times;</span>
+      <h2 style="color: #ec4899; margin-bottom: 20px;">📺 Upload to YouTube</h2>
+
+      <div class="step">
+        <span class="step-number">1</span>
+        <strong>Export from Blockbench</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          In Blockbench, go to <strong>File → Export → Export Animation as Video</strong>
+          or use a screen recorder to capture the animation preview.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <strong>Prepare Your Video File</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Recommended format: MP4 (H.264 codec), 1080p resolution, 30 or 60 FPS.
+          Keep file size under 128 MB for quick uploads.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <strong>Go to YouTube Studio</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Visit <a href="https://studio.youtube.com" target="_blank" style="color: #4f46e5;">studio.youtube.com</a>
+          and click <strong>Create → Upload Video</strong>.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">4</span>
+        <strong>Fill in Video Details</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Add title, description, tags (e.g., "Minecraft", "Blockbench", "Animation"),
+          and choose a catchy thumbnail.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">5</span>
+        <strong>Set Visibility & Publish</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Choose Public, Unlisted, or Private. Click <strong>Publish</strong> when ready!
+        </p>
+      </div>
+
+      <p style="margin-top: 20px; padding: 15px; background: #fef3c7; border-radius: 8px; color: #92400e;">
+        💡 <strong>Pro Tip:</strong> Add voice-over using CapCut before uploading for more engaging content!
+      </p>
+    </div>
+  </div>
+
+  <!-- CapCut Modal -->
+  <div id="capcutModal" class="modal">
+    <div class="modal-content">
+      <span class="modal-close" onclick="closeModal('capcutModal')">&times;</span>
+      <h2 style="color: #10b981; margin-bottom: 20px;">🎙️ Add Voice-Over in CapCut</h2>
+
+      <div class="step">
+        <span class="step-number">1</span>
+        <strong>Download CapCut</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Get CapCut from <a href="https://www.capcut.com" target="_blank" style="color: #10b981;">capcut.com</a>
+          (available for desktop and mobile). It's free!
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">2</span>
+        <strong>Import Your Animation</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Open CapCut, create a new project, and import your exported Minecraft animation video.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">3</span>
+        <strong>Record Voice-Over</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Click <strong>Audio → Record</strong> and narrate your animation.
+          Speak clearly and match your timing to the character movements.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">4</span>
+        <strong>Edit Audio</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Adjust volume levels, add background music from CapCut's library,
+          and use noise reduction if needed.
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">5</span>
+        <strong>Add Effects & Text</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Enhance with transitions, captions, stickers, or effects to make your video pop!
+        </p>
+      </div>
+
+      <div class="step">
+        <span class="step-number">6</span>
+        <strong>Export & Share</strong>
+        <p style="margin-top: 10px; color: #4b5563;">
+          Export in 1080p, then upload directly to YouTube or save for later.
+        </p>
+      </div>
+
+      <p style="margin-top: 20px; padding: 15px; background: #d1fae5; border-radius: 8px; color: #065f46;">
+        🎯 <strong>Voice Tips:</strong> Write a script first, record in a quiet room,
+        and do multiple takes to get the best version!
+      </p>
+    </div>
+  </div>
+
+  <script>
+    function openModal(modalId) {
+      document.getElementById(modalId).classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+      document.body.style.overflow = '';
+    }
+
+    // Close modal on outside click
+    window.onclick = function(event) {
+      if (event.target.classList.contains('modal')) {
+        event.target.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }
+  </script>
+</body>
+</html>

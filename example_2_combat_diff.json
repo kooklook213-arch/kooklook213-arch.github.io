@@ -1,0 +1,152 @@
+--- example_2_combat.json (原始)
+
+
++++ example_2_combat.json (修改后)
+{
+  "format_version": "1.8.0",
+  "scene": {
+    "background": {
+      "theme": "neon",
+      "color": [
+        "#06b6d4",
+        "#f472b6",
+        "#8b5cf6"
+      ],
+      "lighting": "soft"
+    }
+  },
+  "animations": {
+    "combat_sequence": {
+      "loop": true,
+      "animation_length": 3.0,
+      "bones": {
+        "body": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                5,
+                0,
+                10
+              ]
+            },
+            {
+              "time": 2.95,
+              "angle": [
+                5,
+                0,
+                10
+              ]
+            }
+          ],
+          "position": []
+        },
+        "head": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                0
+              ]
+            },
+            {
+              "time": 2.95,
+              "angle": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                -30,
+                0,
+                -45
+              ]
+            },
+            {
+              "time": 2.95,
+              "angle": [
+                -30,
+                0,
+                -45
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                30,
+                0,
+                45
+              ]
+            },
+            {
+              "time": 2.95,
+              "angle": [
+                30,
+                0,
+                45
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                20,
+                0,
+                -15
+              ]
+            },
+            {
+              "time": 2.95,
+              "angle": [
+                20,
+                0,
+                -15
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                -20,
+                0,
+                15
+              ]
+            },
+            {
+              "time": 2.95,
+              "angle": [
+                -20,
+                0,
+                15
+              ]
+            }
+          ],
+          "position": []
+        }
+      }
+    }
+  }
+}

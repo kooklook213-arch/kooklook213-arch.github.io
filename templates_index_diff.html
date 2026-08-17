@@ -1,0 +1,282 @@
+--- templates/index.html (原始)
+
+
++++ templates/index.html (修改后)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Blockbench AI Animation Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .header p { opacity: 0.9; }
+        .chat-container {
+            padding: 30px;
+            min-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .messages {
+            flex: 1;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .message {
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .message.user {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-left: 40px;
+        }
+        .message.assistant {
+            background: white;
+            border: 1px solid #e2e8f0;
+            margin-right: 40px;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        .input-area input {
+            flex: 1;
+            padding: 15px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .input-area input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        .input-area button {
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #4f46e5 0%, #ec4899 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .input-area button:hover { transform: scale(1.05); }
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .quick-btn {
+            padding: 10px 20px;
+            background: #f1f5f9;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .quick-btn:hover {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        .settings-panel {
+            background: #f8fafc;
+            padding: 20px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .settings-row {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .setting-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #475569;
+        }
+        .setting-group select, .setting-group input {
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .download-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 12px 24px;
+            background: #22c55e;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+        .download-link:hover { background: #16a34a; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎬 Blockbench AI Animation Generator</h1>
+            <p>Create Minecraft animations with AI - Just describe what you want!</p>
+        </div>
+
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message assistant">
+                    👋 Hi! I'm your animation assistant. Tell me what kind of animation you want!<br><br>
+                    <strong>Examples:</strong><br>
+                    • "Create a 10 minute yoga animation"<br>
+                    • "Generate a fight scene with Alex character"<br>
+                    • "Make a dance animation with neon theme"
+                </div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Describe your animation..." onkeypress="if(event.key==='Enter')sendMessage()">
+                <button onclick="sendMessage()">🚀 Generate</button>
+            </div>
+
+            <div class="quick-actions">
+                <button class="quick-btn" onclick="quickAction('yoga')">🧘 Yoga</button>
+                <button class="quick-btn" onclick="quickAction('fight')">⚔️ Fight</button>
+                <button class="quick-btn" onclick="quickAction('dance')">💃 Dance</button>
+                <button class="quick-btn" onclick="quickAction('fitness')">💪 Fitness</button>
+                <button class="quick-btn" onclick="quickAction('story')">📖 Story</button>
+            </div>
+        </div>
+
+        <div class="settings-panel">
+            <div class="settings-row">
+                <div class="setting-group">
+                    <label>Character</label>
+                    <select id="characterSelect">
+                        <option value="steve">Steve</option>
+                        <option value="alex">Alex</option>
+                        <option value="gigantic">Gigantic</option>
+                        <option value="tiny">Tiny</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Theme</label>
+                    <select id="themeSelect">
+                        <option value="">Auto</option>
+                        <option value="studio">Studio</option>
+                        <option value="sunset">Sunset</option>
+                        <option value="forest">Forest</option>
+                        <option value="neon">Neon</option>
+                        <option value="ocean">Ocean</option>
+                        <option value="lavender">Lavender</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label>Duration (min)</label>
+                    <input type="number" id="durationInput" value="10" min="1" max="120" style="width:80px">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function addMessage(content, isUser) {
+            const messagesDiv = document.getElementById('messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${isUser ? 'user' : 'assistant'}`;
+            msgDiv.innerHTML = content;
+            messagesDiv.appendChild(msgDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            input.value = '';
+
+            // Simulate processing
+            setTimeout(() => {
+                const character = document.getElementById('characterSelect').value;
+                const theme = document.getElementById('themeSelect').value || 'auto';
+                const duration = document.getElementById('durationInput').value;
+
+                const response = `
+                    ✅ <strong>Animation Generated!</strong><br><br>
+                    <strong>Type:</strong> ${message}<br>
+                    <strong>Character:</strong> ${character.charAt(0).toUpperCase() + character.slice(1)}<br>
+                    <strong>Theme:</strong> ${theme}<br>
+                    <strong>Duration:</strong> ${duration} minutes<br><br>
+                    📥 <a href="#" class="download-link" onclick="downloadAnimation();return false;">Download Animation JSON</a><br><br>
+                    <em>Import this file in Blockbench: File → Import → Import Animation</em>
+                `;
+                addMessage(response, false);
+            }, 1000);
+        }
+
+        function quickAction(type) {
+            const prompts = {
+                yoga: 'Create a 10 minute yoga and meditation animation',
+                fight: 'Generate a 5 minute combat fight scene',
+                dance: 'Make a 8 minute dance choreography',
+                fitness: 'Create a 15 minute fitness workout animation',
+                story: 'Generate a storytelling scene with emotions'
+            };
+            document.getElementById('userInput').value = prompts[type];
+            sendMessage();
+        }
+
+        function downloadAnimation() {
+            const data = {
+                format_version: "1.8.0",
+                animations: {
+                    ai_generated: {
+                        loop: true,
+                        animation_length: 10.0,
+                        bones: {}
+                    }
+                }
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'ai_animation.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

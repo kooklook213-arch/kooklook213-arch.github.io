@@ -1,0 +1,139 @@
+--- docs/index.html (原始)
+
+
++++ docs/index.html (修改后)
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blockbench Animation Generator - Free Minecraft Animations</title>
+  <meta name="description" content="Browse and download 200+ free pre-generated Minecraft animations for Blockbench. Yoga, combat, dance, fitness, and storytelling poses.">
+  <meta name="keywords" content="Minecraft, Blockbench, Animation, JSON, Free, Download, Yoga, Combat, Dance">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>🎬 Blockbench Animation Generator</h1>
+      <p class="subtitle">Browse and download 200+ free pre-generated Minecraft animations</p>
+      <div class="stats">
+        <span class="stat-item">📦 <strong id="totalAnimations">0</strong> Animations</span>
+        <span class="stat-item">🧘 <strong id="yogaCount">0</strong> Yoga</span>
+        <span class="stat-item">⚔️ <strong id="fightCount">0</strong> Combat</span>
+        <span class="stat-item">💃 <strong id="danceCount">0</strong> Dance</span>
+      </div>
+    </div>
+  </header>
+
+  <nav class="categories container">
+    <button data-category="all" class="active">All</button>
+    <button data-category="yoga">🧘 Yoga</button>
+    <button data-category="fight">⚔️ Combat</button>
+    <button data-category="dance">💃 Dance</button>
+    <button data-category="fitness">💪 Fitness</button>
+    <button data-category="minecraft">🎮 Minecraft</button>
+    <button data-category="story">📖 Storytelling</button>
+    <button data-category="meditation">🧘 Meditation</button>
+  </nav>
+
+  <main class="container">
+    <section class="library-section">
+      <h2>Animation Library</h2>
+      <div class="filters">
+        <input type="text" id="searchInput" placeholder="🔍 Search animations..." />
+        <select id="durationFilter">
+          <option value="all">Any Duration</option>
+          <option value="short">&lt; 5 min</option>
+          <option value="medium">5-15 min</option>
+          <option value="long">&gt; 15 min</option>
+        </select>
+        <select id="themeFilter">
+          <option value="all">Any Theme</option>
+          <option value="studio">Studio</option>
+          <option value="sunset">Sunset</option>
+          <option value="forest">Forest</option>
+          <option value="neon">Neon</option>
+          <option value="ocean">Ocean</option>
+          <option value="lavender">Lavender</option>
+        </select>
+      </div>
+
+      <div class="library-grid" id="libraryGrid">
+        <!-- Cards populated by JavaScript -->
+        <div class="loading">Loading animations...</div>
+      </div>
+    </section>
+
+    <section class="preview-section" id="previewSection" style="display: none;">
+      <h2>Preview: <span id="previewTitle"></span></h2>
+      <div class="preview-container">
+        <div id="previewContainer" class="threejs-viewer"></div>
+        <div class="controls">
+          <button id="playBtn" class="btn-primary">▶ Play</button>
+          <button id="pauseBtn" class="btn-secondary">⏸ Pause</button>
+          <button id="resetBtn" class="btn-secondary">↺ Reset</button>
+          <input type="range" id="timeline" min="0" max="100" value="0" class="timeline-slider" />
+          <span id="timeDisplay">0.0s / 0.0s</span>
+        </div>
+      </div>
+
+      <div class="animation-details">
+        <div class="detail-row">
+          <span class="label">Duration:</span>
+          <span id="detailDuration" class="value"></span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Theme:</span>
+          <span id="detailTheme" class="value theme-badge"></span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Bones:</span>
+          <span id="detailBones" class="value"></span>
+        </div>
+        <div class="detail-row">
+          <span class="label">Keyframes:</span>
+          <span id="detailKeyframes" class="value"></span>
+        </div>
+      </div>
+
+      <div class="download-section">
+        <h3>Download & Use</h3>
+        <div class="download-buttons">
+          <button id="downloadJson" class="btn-primary btn-large">📥 Download JSON for Blockbench</button>
+          <button id="copyLink" class="btn-secondary btn-large">📋 Copy Link</button>
+          <a href="https://blockbench.net/" target="_blank" class="btn-link btn-large">🔗 Open Blockbench</a>
+        </div>
+
+        <div class="instructions">
+          <h4>How to Use:</h4>
+          <ol>
+            <li>Click "Download JSON for Blockbench"</li>
+            <li>Open <a href="https://blockbench.net/" target="_blank">Blockbench</a></li>
+            <li>Go to <strong>File → Import → Import Animation</strong></li>
+            <li>Select the downloaded .json file</li>
+            <li>Watch your animation play on the model</li>
+            <li>Export as video: <strong>Export → Export Video</strong></li>
+            <li>Edit voice-over in CapCut or upload directly to YouTube</li>
+          </ol>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Generated with ❤️ from Python. Powered by GitHub Pages.</p>
+      <div class="footer-links">
+        <a href="https://github.com" target="_blank">View on GitHub</a>
+        <a href="https://blockbench.net/" target="_blank">Blockbench Website</a>
+        <a href="data/library.json" target="_blank">Animation Library JSON</a>
+      </div>
+      <p class="copyright">Free for personal and commercial use. No attribution required.</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

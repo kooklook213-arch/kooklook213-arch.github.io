@@ -1,0 +1,104 @@
+--- docs/animations/yoga_flow.json (原始)
+
+
++++ docs/animations/yoga_flow.json (修改后)
+{
+  "format_version": "1.8.0",
+  "scene": {
+    "background": {
+      "theme": "lavender",
+      "color": [
+        "#c084fc",
+        "#a78bfa",
+        "#f9a8d4"
+      ],
+      "lighting": "soft"
+    }
+  },
+  "animations": {
+    "yoga_flow": {
+      "loop": true,
+      "animation_length": 4,
+      "bones": {
+        "body": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "head": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                0
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                -10
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightArm": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                10
+              ]
+            }
+          ],
+          "position": []
+        },
+        "leftLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                2
+              ]
+            }
+          ],
+          "position": []
+        },
+        "rightLeg": {
+          "rotation": [
+            {
+              "time": 0.0,
+              "angle": [
+                0,
+                0,
+                -2
+              ]
+            }
+          ],
+          "position": []
+        }
+      }
+    }
+  }
+}

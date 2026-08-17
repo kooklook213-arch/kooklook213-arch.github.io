@@ -1,0 +1,97 @@
+--- docs/data/library.json (原始)
+
+
++++ docs/data/library.json (修改后)
+[
+  {
+    "name": "Standing Pose",
+    "file": "standing_pose.json",
+    "description": "Basic standing pose with natural arm and leg positioning. Perfect for idle animations or character introductions.",
+    "category": "minecraft",
+    "duration_minutes": 1,
+    "theme": "studio",
+    "colors": [
+      "#4f46e5",
+      "#a78bfa",
+      "#f8fafc"
+    ]
+  },
+  {
+    "name": "Combat Sequence",
+    "file": "combat_sequence.json",
+    "description": "Dynamic fighting stance with body rotation and arm positioning. Great for action scenes and battle animations.",
+    "category": "fight",
+    "duration_minutes": 3,
+    "theme": "neon",
+    "colors": [
+      "#06b6d4",
+      "#f472b6",
+      "#8b5cf6"
+    ]
+  },
+  {
+    "name": "Yoga Flow",
+    "file": "yoga_flow.json",
+    "description": "Peaceful downward dog yoga pose with calming lavender theme. Ideal for meditation and wellness content.",
+    "category": "yoga",
+    "duration_minutes": 4,
+    "theme": "lavender",
+    "colors": [
+      "#c084fc",
+      "#a78bfa",
+      "#f9a8d4"
+    ]
+  },
+  {
+    "name": "AI Scene Fitness",
+    "file": "ai_scene_fitness.json",
+    "description": "Energetic jump pose with body lifted high. Perfect for fitness tutorials and workout videos.",
+    "category": "fitness",
+    "duration_minutes": 6,
+    "theme": "ocean",
+    "colors": [
+      "#0ea5e9",
+      "#1d4ed8",
+      "#a5f3fc"
+    ]
+  },
+  {
+    "name": "AI Scene Storytelling",
+    "file": "ai_scene_storytelling.json",
+    "description": "Gentle stare pose with focused head tilt. Excellent for narrative moments and story-driven content.",
+    "category": "story",
+    "duration_minutes": 6,
+    "theme": "sunrise",
+    "colors": [
+      "#fbbf24",
+      "#f472b6",
+      "#fef3c7"
+    ]
+  },
+  {
+    "name": "AI Scene Yoga",
+    "file": "ai_scene_yoga.json",
+    "description": "Calm meditation pose with mindful focus. Soothing lavender background for tranquility.",
+    "category": "meditation",
+    "duration_minutes": 6,
+    "theme": "lavender",
+    "colors": [
+      "#c084fc",
+      "#a78bfa",
+      "#f9a8d4"
+    ]
+  },
+  {
+    "name": "Walk Cycle",
+    "file": "walk_cycle.json",
+    "description": "Natural walking motion with alternating arm and leg swing. Forest theme for outdoor adventures.",
+    "category": "minecraft",
+    "duration_minutes": 2,
+    "theme": "forest",
+    "colors": [
+      "#14532d",
+      "#22c55e",
+      "#bef264"
+    ]
+  }
+]
