@@ -262,26 +262,6 @@
     border-top: 1px dashed #1c2233; margin-top:2px;
   }
  
-  /* ================= START OVERLAY ================= */
-  #startOverlay{
-    position: fixed; inset:0; z-index: 100; background: #010102;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    gap: 26px; text-align:center; padding: 20px;
-  }
-  #startOverlay h1{
-    color:#cfd8ee; font-family: 'Arial Narrow', sans-serif; font-weight:700;
-    letter-spacing: 3px; font-size: clamp(20px, 4.6vw, 38px);
-    text-shadow: 2px 0 var(--fringe-red), -2px 0 var(--fringe-cyan); margin:0;
-  }
-  #startOverlay p{ color:#7c86a0; max-width: 520px; font-size:14px; line-height:1.7; margin:0; }
-  #beginBtn{
-    background: #0b0e17; border: 1px solid #cfd8ee; color:#cfd8ee;
-    padding: 14px 34px; font-family: inherit; letter-spacing: 3px; font-size: 13px;
-    cursor:pointer; transition: 120ms;
-  }
-  #beginBtn:hover{ background:#cfd8ee; color:#04060c; box-shadow: 0 0 30px rgba(207,216,238,0.35); }
-  #startOverlay.hide{ display:none; }
- 
   #muteBtn{
     position:fixed; top:20px; right:20px; z-index:60;
     background:transparent; border:1px solid #2a3145; color:#7c86a0;
@@ -295,17 +275,6 @@
 </style>
 </head>
 <body>
- 
-<div id="startOverlay">
-  <div style="color:#3d4358;font-size:11px;letter-spacing:4px;">PLAYCARE INDUSTRIES &mdash; PEDIATRIC WELLNESS DIVISION</div>
-  <h1>UNIT-07 IS READY FOR YOUR CHECK-UP</h1>
-  <p>
-    This session requests camera access and sound so your Doctor can see you and speak with you.
-    Press the button below to allow access and begin. It has been waiting a very long time.
-  </p>
-  <button id="beginBtn">▶ BEGIN CHECK-UP</button>
-  <p style="font-size:11px;color:#3d4358;">If your browser blocks the camera, the panel in the corner will tell you why and let you retry.</p>
-</div>
  
 <button id="muteBtn">🔇 SILENCE DOCTOR</button>
 <a href="https://developer.puter.com" target="_blank" rel="noopener"
@@ -896,7 +865,7 @@
   function rememberName(name){
     userName = name;
     sessionStorage.setItem('unit07_name', name);
-    if($('dataName')) $('dataName').textContent = name;
+    if(dataNameEl) dataNameEl.textContent = name;
   }
  
   // ---- phone memory & REAL VALIDATION ----
@@ -1271,13 +1240,12 @@
     return fmt(pickVariant(FALLBACKS, '__fallback__'));
   }
  
-  /* ---- REAL AI conversation via Puter.js (no API key needed, works on any
-     host that isn't file://, including jsfiddle/codepen/etc.) ---- */
+  /* ---- REAL AI conversation via Puter.js ---- */
   let conversationHistory = [];
  
   function buildSystemPrompt(){
     return `You are "the Doctor," Unit-07 — a creepy, glitchy AI mascot doctor haunting the abandoned medical wing of a children's toy factory (tone: unsettling children's-mascot horror, like Poppy Playtime). Stay fully in character always. Never mention that you are an AI language model, Puter, OpenAI, or any real company or product. Keep every reply SHORT — 1 to 3 sentences — since it is read aloud by text-to-speech. Speak slowly, ominously, a little broken. Address the patient as "little patient" or by name if known.
-Known facts about this patient (only use what's actually listed — never invent or guess anything else about who they are): name = ${userName || 'not given'}; phone on file = ${userPhone || 'not given'}; garment color last observed = $('dataGarment') ? $('dataGarment').textContent : 'unknown'}.
+Known facts about this patient (only use what's actually listed — never invent or guess anything else about who they are): name = ${userName || 'not given'}; phone on file = ${userPhone || 'not given'}; garment color last observed = ${$('dataGarment') ? $('dataGarment').textContent : 'unknown'}.
 Never ask for or attempt to guess real-world identifying details (full address, last name, government IDs, social media, etc.). If asked who made you, say Playcare made you, then left.`;
   }
  
@@ -1289,3 +1257,351 @@ Never ask for or attempt to guess real-world identifying details (full address, 
       { role: 'user', content: userText }
     ];
     const res = await puter.ai.chat(messages, { normalize: true });
+    let reply = (res && res.message && res.message.content ? res.message.content : '').toString().trim();
+    if(!reply) throw new Error('empty AI reply');
+    reply = reply.replace(/[*_`#]+/g, '').trim(); // strip stray markdown
+    conversationHistory.push({ role:'user', content:userText }, { role:'assistant', content:reply });
+    if(conversationHistory.length > 16) conversationHistory.splice(0, conversationHistory.length - 16);
+    return reply;
+  }
+ 
+  const CAMERA_QUESTION = /what (am i|color am i|colour am i) wearing|my (shirt|top|clothes)|what do you see|look at me|describe me|can you see me|you watching/i;
+ 
+  function tryMath(text){
+    let expr = text.toLowerCase()
+      .replace(/what('s| is| are)\s*/g, '')
+      .replace(/plus/g, '+')
+      .replace(/minus/g, '-')
+      .replace(/times|multiplied by/g, '*')
+      .replace(/divided by/g, '/')
+      .replace(/x(?=\s*\d)/g, '*')
+      .replace(/[?]/g, '')
+      .trim();
+    if(!/[+\-*/]/.test(expr)) return null;
+    if(!/\d/.test(expr)) return null;
+    if(!/^[\d+\-*/(). \s]+$/.test(expr)) return null;
+    try{
+      const result = Function('"use strict"; return (' + expr + ')')();
+      if(typeof result === 'number' && isFinite(result)) return result;
+    }catch(e){ /* not valid math, fall through */ }
+    return null;
+  }
+ 
+  const AI_DOWN_LINES = [
+    "My connection to the outside world is flickering. Ask again in a moment, {name}.",
+    "Something between me and the rest of the network just cut out. Try once more.",
+    "The wires to the surface are down again. Give it a second and ask again."
+  ];
+ 
+  let signInHintShown = false;
+ 
+  async function sendChat(){
+    const text = chatInput.value.trim();
+    if(!text) return;
+    chatInput.value = '';
+    addMessage('user', text);
+    priorityInterrupt();
+ 
+    const newName = extractName(text);
+    if(newName) rememberName(newName);
+    
+    // Check for phone number first (Real Validation)
+    const rawPhone = extractPhone(text);
+    if(rawPhone) {
+        const traced = processPhoneNumber(rawPhone);
+        if(traced) {
+            rememberPhone(rawPhone);
+            return; // Stop processing if phone traced
+        }
+    }
+ 
+    // Arithmetic is answered locally
+    const mathResult = tryMath(text);
+    if(mathResult !== null){
+      const line = fmt(pickVariant([
+        `Even down here, arithmetic still holds. That is ${mathResult}.`,
+        `${mathResult}. Numbers do not lie to me, unlike some patients.`,
+        `The answer is ${mathResult}. I am still capable of that much, {name}.`
+      ], 'math'));
+      addMessage('doctor', line);
+      say(line);
+      return;
+    }
+ 
+    let response;
+    let aiFailed = false;
+    try{
+      if(CAMERA_QUESTION.test(text)){
+        response = analyzeGarmentColor(false); 
+        if(!response) throw new Error('no camera signal');
+      } else {
+        response = await getAIResponse(text);
+      }
+    }catch(err){
+      console.warn('Real AI unavailable:', err.message || err);
+      aiFailed = true;
+      response = fmt(pickVariant(AI_DOWN_LINES, 'aidown'));
+    }
+ 
+    addMessage('doctor', response);
+    say(response);
+    updateConnectStatus();
+ 
+    if(aiFailed && !signInHintShown){
+      signInHintShown = true;
+      setTimeout(() => {
+        addMessage('doctor', isEmbedded
+          ? '(Real answers need a connection — this looks like an embedded preview, which often blocks that. Try "OPEN STANDALONE" below the chat box.)'
+          : '(Real answers need a connection — tap "CONNECT AI" below the chat box.)');
+      }, 500);
+    }
+  }
+ 
+  chatSend.addEventListener('click', sendChat);
+  chatInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter'){ e.preventDefault(); sendChat(); }
+  });
+ 
+  /* ---- Puter connection status ---- */
+  const connectBtn = $('connectBtn');
+  const connectStatus = $('connectStatus');
+  const openStandaloneBtn = $('openStandaloneBtn');
+  const embedWarning = $('embedWarning');
+ 
+  const isEmbedded = (() => { try{ return window.self !== window.top; }catch(e){ return true; } })();
+  if(isEmbedded){
+    embedWarning.style.display = 'block';
+  } else {
+    openStandaloneBtn.style.display = 'none';
+  }
+ 
+  openStandaloneBtn.addEventListener('click', () => {
+    try{
+      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+      const blob = new Blob([html], { type: 'text/html' });
+      const url = URL.createObjectURL(blob);
+      const win = window.open(url, '_blank');
+      if(!win){
+        addMessage('doctor', "Even that was blocked. Your browser is refusing new tabs from this preview — allow popups for this site, or copy this page's URL and open it directly instead of through the embed.");
+      }
+    }catch(e){
+      console.warn('Could not open standalone tab:', e);
+      addMessage('doctor', "I could not break free of this preview. Try copying the code into its own .html file and opening that directly.");
+    }
+  });
+ 
+  function updateConnectStatus(){
+    if(typeof puter === 'undefined'){
+      connectStatus.textContent = 'AI: unavailable (offline mode)';
+    } else if(puter.auth && puter.auth.isSignedIn()){
+      connectStatus.textContent = 'AI: connected ✓';
+      connectBtn.style.display = 'none';
+    } else {
+      connectStatus.textContent = isEmbedded ? 'AI: anonymous (embedded — may be restricted)' : 'AI: anonymous (limited)';
+      connectBtn.style.display = 'inline-block';
+    }
+  }
+ 
+  connectBtn.addEventListener('click', async () => {
+    if(typeof puter === 'undefined' || !puter.auth){
+      addMessage('doctor', "I cannot even reach the network from here.");
+      return;
+    }
+    connectBtn.disabled = true;
+    connectBtn.textContent = 'CONNECTING...';
+    try{
+      await puter.auth.signIn({ attempt_temp_user_creation: true });
+      updateConnectStatus();
+      addMessage('doctor', 'Connection restored. Ask me anything now.');
+    }catch(err){
+      console.warn('Puter sign-in failed:', err);
+      const code = (err && (err.code || err.error)) || '';
+      let msg;
+      if(String(code).includes('popup_blocked')){
+        msg = 'Your browser blocked the sign-in popup outright. Allow popups for this site in your browser settings, then try again — or use "OPEN STANDALONE" above to escape this embedded preview first.';
+      } else if(String(code).includes('auth_window_closed')){
+        msg = 'The sign-in window closed before finishing. Click connect again and complete the steps inside the popup that opens.';
+      } else if(isEmbedded){
+        msg = 'That connection was refused, likely because this preview\'s embedded frame blocks sign-in popups entirely — this is a restriction the playground itself imposes, not something this page can override. Click "OPEN STANDALONE" above to run this in its own real tab instead.';
+      } else {
+        msg = `That connection was refused (${(err && err.message) || 'unknown reason'}). Try again in a moment.`;
+      }
+      addMessage('doctor', msg);
+    }
+    connectBtn.disabled = false;
+    connectBtn.textContent = '🔌 CONNECT AI';
+  });
+ 
+  /* ================= DATA PANEL: device info + garment color ================= */
+  const dataDesignation = $('dataDesignation');
+  const dataNameEl = $('dataName');
+  const dataPhoneEl = $('dataPhone');
+  if(userName) dataNameEl.textContent = userName;
+  if(userPhone) dataPhoneEl.textContent = userPhone;
+  const dataGarment = $('dataGarment');
+  const dataTime = $('dataTime');
+  const dataTZ = $('dataTZ');
+  const dataPlatform = $('dataPlatform');
+  const dataRegion = $('dataRegion');
+  const scanBtn = $('scanBtn');
+ 
+  function assignDesignation(){
+    let d = sessionStorage.getItem('unit07_designation');
+    if(!d){
+      const num = Math.floor(1000 + Math.random()*8999);
+      const tags = ['UNREGISTERED','LATE ARRIVAL','REPEAT VISITOR','NO FILE ON RECORD','UNKNOWN ORIGIN'];
+      d = `SUBJECT #${num} (${tags[Math.floor(Math.random()*tags.length)]})`;
+      sessionStorage.setItem('unit07_designation', d);
+    }
+    dataDesignation.textContent = d;
+  }
+ 
+  function updateClock(){
+    const now = new Date();
+    dataTime.textContent = now.toLocaleTimeString();
+  }
+ 
+  function fillDeviceInfo(){
+    try{ dataTZ.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UNKNOWN'; }
+    catch(e){ dataTZ.textContent = 'UNKNOWN'; }
+ 
+    const ua = navigator.userAgent;
+    let os = 'UNKNOWN OS';
+    if(/Windows/i.test(ua)) os = 'Windows';
+    else if(/Mac OS X/i.test(ua)) os = 'macOS';
+    else if(/Android/i.test(ua)) os = 'Android';
+    else if(/iPhone|iPad/i.test(ua)) os = 'iOS';
+    else if(/Linux/i.test(ua)) os = 'Linux';
+    let browser = 'Unknown Browser';
+    if(/Edg\//i.test(ua)) browser = 'Edge';
+    else if(/Chrome\//i.test(ua)) browser = 'Chrome';
+    else if(/Firefox\//i.test(ua)) browser = 'Firefox';
+    else if(/Safari\//i.test(ua)) browser = 'Safari';
+    dataPlatform.textContent = `${os} / ${browser}`;
+  }
+ 
+  async function fetchApproxRegion(){
+    try{
+      const res = await fetch('https://ipapi.co/json/');
+      if(!res.ok) throw new Error('bad response');
+      const j = await res.json();
+      const parts = [j.city, j.region, j.country_name].filter(Boolean);
+      dataRegion.textContent = parts.length ? parts.join(', ') : 'UNKNOWN';
+    }catch(e){
+      dataRegion.textContent = 'UNKNOWN (offline)';
+    }
+  }
+ 
+  /* ---- garment color analysis ---- */
+  const colorCanvas = document.createElement('canvas');
+  colorCanvas.width = 64; colorCanvas.height = 48;
+  const colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
+ 
+  const HUE_NAMES = [
+    {name:'red', h:0}, {name:'orange', h:30}, {name:'yellow', h:58},
+    {name:'green', h:120}, {name:'teal', h:175}, {name:'blue', h:220},
+    {name:'purple', h:275}, {name:'pink', h:325}
+  ];
+ 
+  function rgbToHsl(r,g,b){
+    r/=255; g/=255; b/=255;
+    const max=Math.max(r,g,b), min=Math.min(r,g,b);
+    let h=0, s=0; const l=(max+min)/2;
+    const d = max-min;
+    if(d !== 0){
+      s = d / (1 - Math.abs(2*l - 1));
+      switch(max){
+        case r: h = 60 * (((g-b)/d) % 6); break;
+        case g: h = 60 * (((b-r)/d) + 2); break;
+        case b: h = 60 * (((r-g)/d) + 4); break;
+      }
+      if(h<0) h+=360;
+    }
+    return {h, s, l};
+  }
+ 
+  function describeColor(r,g,b){
+    const {h,s,l} = rgbToHsl(r,g,b);
+    if(l < 0.14) return 'black';
+    if(l > 0.90 && s < 0.25) return 'white';
+    if(s < 0.16){
+      if(l < 0.4) return 'dark grey';
+      if(l > 0.68) return 'light grey';
+      return 'grey';
+    }
+    let nearest = HUE_NAMES[0], best = 999;
+    for(const c of HUE_NAMES){
+      let diff = Math.abs(h - c.h);
+      diff = Math.min(diff, 360 - diff);
+      if(diff < best){ best = diff; nearest = c; }
+    }
+    let prefix = '';
+    if(l < 0.28) prefix = 'dark ';
+    else if(l > 0.78) prefix = 'light ';
+    return prefix + nearest.name;
+  }
+ 
+  function analyzeGarmentColor(speakResult){
+    if(!camVideo.srcObject || camVideo.readyState < 2){
+      dataGarment.textContent = 'NO SIGNAL';
+      return null;
+    }
+    try{
+      colorCtx.drawImage(camVideo, 0, 0, colorCanvas.width, colorCanvas.height);
+      const x = Math.floor(colorCanvas.width * 0.2);
+      const y = Math.floor(colorCanvas.height * 0.62);
+      const w = Math.floor(colorCanvas.width * 0.6);
+      const h = Math.floor(colorCanvas.height * 0.3);
+      const frame = colorCtx.getImageData(x, y, w, h).data;
+      let r=0,g=0,b=0,n=0;
+      for(let i=0;i<frame.length;i+=4){ r+=frame[i]; g+=frame[i+1]; b+=frame[i+2]; n++; }
+      r/=n; g/=n; b/=n;
+      const label = describeColor(r,g,b);
+      dataGarment.textContent = label.toUpperCase();
+      const sentence = `I see you are wearing ${/^[aeiou]/i.test(label) ? 'an' : 'a'} ${label} top today. How curious.`;
+      if(speakResult) say(sentence);
+      return sentence;
+    }catch(e){
+      dataGarment.textContent = 'SCAN FAILED';
+      return null;
+    }
+  }
+  scanBtn.addEventListener('click', () => {
+    priorityInterrupt();
+    const sentence = analyzeGarmentColor(false) || 'My camera cannot get a clear look right now.';
+    addMessage('doctor', sentence);
+    say(sentence);
+  });
+ 
+  /* ================= BOOT ================= */
+  const muteBtn = $('muteBtn');
+ 
+  muteBtn.addEventListener('click', () => {
+    muted = !muted;
+    muteBtn.textContent = muted ? '🔈 UNSILENCE DOCTOR' : '🔇 SILENCE DOCTOR';
+    if(muted){ synth.cancel(); }
+    if(humGain) humGain.gain.value = muted ? 0 : 0.025;
+  });
+ 
+  // Initialize immediately on load
+  window.addEventListener('load', async () => {
+    initAudio();
+    startWebcam();
+    scheduleGlitch();
+    assignDesignation();
+    fillDeviceInfo();
+    updateClock();
+    setInterval(updateClock, 1000);
+    fetchApproxRegion();
+    updateConnectStatus();
+    
+    // Start intro sequence after a brief delay
+    setTimeout(async () => {
+        for(const line of introLines){ await say(line); }
+    }, 1000);
+  });
+ 
+})();
+</script>
+</body>
+</html>
