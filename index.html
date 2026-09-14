@@ -32,14 +32,6 @@
     font-family: 'Courier New', Courier, monospace;
     cursor: crosshair;
   }
-
-  /* Click hint for auto-start */
-  #clickHint {
-    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
-    color: #4a5268; font-size: 10px; z-index: 200; pointer-events: none;
-    text-align: center; opacity: 0.7; animation: fadeOut 5s forwards 2s;
-  }
-  @keyframes fadeOut { to { opacity: 0; } }
  
   /* ================= STAGE / BACKGROUND ================= */
   #stage{
@@ -58,16 +50,13 @@
     100%{ transform: translate(0,0); filter: contrast(1) hue-rotate(0deg); }
   }
  
-  /* starfield: fixed sparse dots, drawn once */
   #starCanvas{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; }
  
-  /* fine film grain, animated, kept subtle */
   #staticCanvas{
     position:fixed; inset:0; width:100%; height:100%;
     pointer-events:none; mix-blend-mode: overlay; opacity:0.18; z-index:2;
   }
  
-  /* VHS tracking glitch bars that jump position/opacity */
   .glitchBar{
     position:fixed; left:0; width:100%; height:2px;
     background: rgba(230,235,250,0.35);
@@ -278,13 +267,10 @@
   #muteBtn:hover{ border-color:#cfd8ee; color:#cfd8ee; }
  
   @media (prefers-reduced-motion: reduce){ #eyeWrap, #stage{ animation: none !important; } }
- 
   @media (max-width: 560px){ #camPanel{ width:150px; left:10px; bottom:10px; } #designation{ font-size:10px; } }
 </style>
 </head>
 <body>
-
-<div id="clickHint">CLICK ANYWHERE TO INITIALIZE SYSTEMS...</div>
  
 <button id="muteBtn">🔇 SILENCE DOCTOR</button>
 <a href="https://developer.puter.com" target="_blank" rel="noopener"
@@ -340,25 +326,17 @@
         </filter>
       </defs>
  
-      <!-- eyeball contents, clipped to lens shape -->
       <g clip-path="url(#eyeClip)">
         <rect x="0" y="0" width="600" height="320" fill="url(#scleraGrad)"/>
- 
-        <!-- faint blood vessels -->
         <g stroke="#7a2a2a" fill="none" opacity="0.32" stroke-linecap="round">
           <path d="M30,150 q90,-16 170,2" stroke-width="1.4"/>
           <path d="M25,175 q100,26 190,10" stroke-width="1.1"/>
           <path d="M560,140 q-80,-14 -150,4" stroke-width="1.3"/>
           <path d="M575,180 q-90,20 -170,4" stroke-width="1"/>
         </g>
- 
-        <!-- corner shading for depth -->
         <path d="M18,162 C120,55 250,26 300,26 C350,26 480,55 582,162 C480,269 350,298 300,298 C250,298 120,269 18,162 Z"
               fill="none" stroke="#000000" stroke-width="34" opacity="0.30" filter="url(#softBlur)"/>
- 
-        <!-- grain texture overlay -->
         <rect x="0" y="0" width="600" height="320" filter="url(#grain)" opacity="0.6"/>
- 
         <g id="irisGroup" transform="translate(300,168)">
           <circle r="82" fill="url(#irisGrad)"/>
           <circle r="82" fill="none" stroke="#100b06" stroke-width="3" opacity="0.7"/>
@@ -368,7 +346,6 @@
         </g>
       </g>
  
-      <!-- eyelids for blinking -->
       <g id="lidTop" clip-path="url(#eyeClip)">
         <rect x="0" y="0" width="600" height="320" fill="#05070f"/>
       </g>
@@ -376,7 +353,6 @@
         <rect x="0" y="0" width="600" height="320" fill="#05070f"/>
       </g>
  
-      <!-- crisp outline, drawn last -->
       <path d="M18,162 C120,55 250,26 300,26 C350,26 480,55 582,162 C480,269 350,298 300,298 C250,298 120,269 18,162 Z"
             fill="none" stroke="#04060c" stroke-width="5"/>
     </svg>
@@ -414,7 +390,7 @@
     </span>
   </div>
   <div id="embedWarning" style="display:none;">
-    ⚠ Running inside an embedded preview (e.g. JSFiddle/CodePen's result pane). Sign-in popups are frequently blocked here by the platform itself — click "OPEN STANDALONE" above to run this in its own real tab, where sign-in reliably works.
+    ⚠ Running inside an embedded preview. Sign-in popups are frequently blocked here — click "OPEN STANDALONE" above to run this in its own real tab.
   </div>
 </div>
  
@@ -425,9 +401,8 @@
   const rand = (a,b) => a + Math.random()*(b-a);
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
   let muted = false;
-  let initialized = false;
  
-  /* ================= STARFIELD (drawn once, static) ================= */
+  /* ================= STARFIELD ================= */
   const starCanvas = $('starCanvas');
   const stctx = starCanvas.getContext('2d');
   function drawStars(){
@@ -449,7 +424,7 @@
   drawStars();
   window.addEventListener('resize', drawStars);
  
-  /* ================= FINE FILM GRAIN (animated, subtle) ================= */
+  /* ================= FILM GRAIN ================= */
   const staticCanvas = $('staticCanvas');
   const sctx = staticCanvas.getContext('2d');
   function sizeStatic(){ staticCanvas.width = window.innerWidth; staticCanvas.height = window.innerHeight; }
@@ -488,7 +463,7 @@
   }
   drawCamNoise();
  
-  /* ================= VHS GLITCH BARS ================= */
+  /* ================= GLITCH BARS ================= */
   const barPool = [];
   for(let i=0;i<3;i++){
     const bar = document.createElement('div');
@@ -506,11 +481,11 @@
     setTimeout(() => { barPool.forEach(bar => bar.style.opacity = 0); }, rand(60,160));
   }
  
-  /* ================= EYE: tracking + blink ================= */
+  /* ================= EYE TRACKING ================= */
   const eyeSvg = $('eyeSvg');
   const irisGroup = $('irisGroup');
   let targetX = 0, targetY = 0, curX = 0, curY = 0;
-  const MAX_MOVE = 34; // svg units
+  const MAX_MOVE = 34;
  
   function updateIrisTarget(clientX, clientY){
     const rect = eyeSvg.getBoundingClientRect();
@@ -552,7 +527,7 @@
   }
   scheduleBlink();
  
-  /* ================= RANDOM VISUAL GLITCHES ================= */
+  /* ================= VISUAL GLITCHES ================= */
   const stage = $('stage');
   const statusWord = $('statusWord');
   const statuses = ['AWAKE','OBSERVING','LISTENING','CURIOUS','WAITING','PLEASED'];
@@ -567,7 +542,7 @@
     }, rand(4000, 11000));
   }
  
-  /* ================= WEBCAM (with real error handling) ================= */
+  /* ================= WEBCAM ================= */
   const camVideo = $('camVideo');
   const camOffline = $('camOffline');
   const camOfflineMsg = $('camOfflineMsg');
@@ -599,15 +574,15 @@
     camVideo.style.display = 'block';
  
     if(location.protocol === 'file:'){
-      showCamError('CAMERA BLOCKED: this page was opened as a local file. Serve it over http(s) — e.g. run "python -m http.server" in this folder and open http://localhost:8000 — then retry.');
+      showCamError('CAMERA BLOCKED: Open via HTTPS or localhost.');
       return;
     }
     if(!window.isSecureContext){
-      showCamError('CAMERA BLOCKED: this page is not running in a secure context. Use HTTPS or http://localhost, then retry.');
+      showCamError('CAMERA BLOCKED: Needs HTTPS.');
       return;
     }
     if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-      showCamError('Camera API not available in this browser.');
+      showCamError('Camera API not available.');
       return;
     }
  
@@ -620,17 +595,11 @@
       }, { once:true });
     }catch(err){
       let msg = 'CAMERA UNAVAILABLE.';
-      if(err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError'){
-        msg = 'PERMISSION DENIED. Click the camera icon in your address bar, allow access, then retry.';
-      } else if(err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError'){
-        msg = 'NO CAMERA DETECTED on this device.';
-      } else if(err.name === 'NotReadableError'){
-        msg = 'CAMERA IS BUSY in another app. Close it and retry.';
-      } else if(err.name === 'SecurityError'){
-        msg = 'BLOCKED BY BROWSER SECURITY POLICY (needs https or localhost).';
-      }
+      if(err.name === 'NotAllowedError') msg = 'PERMISSION DENIED. Allow camera access.';
+      else if(err.name === 'NotFoundError') msg = 'NO CAMERA DETECTED.';
+      else if(err.name === 'NotReadableError') msg = 'CAMERA BUSY.';
       showCamError(msg);
-      console.warn('Camera unavailable:', err.name, err.message);
+      console.warn('Camera unavailable:', err);
     }
   }
   camRetry.addEventListener('click', startWebcam);
@@ -704,7 +673,7 @@
     osc.start(); osc.stop(actx.currentTime + 0.05);
   }
 
-  /* ================= DIAL TONE GENERATOR ================= */
+  /* ================= DIAL TONE ================= */
   function playDialTone(){
     if(!actx || muted) return;
     const osc1 = actx.createOscillator();
@@ -727,13 +696,12 @@
     }, 2000);
   }
  
-  /* ================= VOICE (ENHANCED HORROR) ================= */
+  /* ================= VOICE (HORROR) ================= */
   const synth = window.speechSynthesis;
   let chosenVoice = null;
   function pickVoice(){
     const voices = synth.getVoices();
     if(!voices.length) return;
-    // Prefer deep, male voices
     const preferredNames = ['Daniel','Google UK English Male','Microsoft David','Alex','Fred','Aaron'];
     chosenVoice =
       voices.find(v => preferredNames.some(n => v.name.includes(n))) ||
@@ -766,7 +734,6 @@
     return new Promise((resolve) => {
       if(!synth || muted){ typeSubtitle(text); setTimeout(resolve, Math.min(2600, text.length*55)); return; }
       
-      // Add stutter effect to text randomly
       let glitchedText = text;
       if(Math.random() < 0.3) {
         const words = text.split(' ');
@@ -789,9 +756,8 @@
         const utter = new SpeechSynthesisUtterance(chunk);
         if(chosenVoice) utter.voice = chosenVoice;
         
-        // ENHANCED VOICE: Lower pitch, slower rate
-        utter.pitch = clamp(0.25 + rand(-0.05,0.05), 0.1, 0.6); // Very low
-        utter.rate = clamp(0.45 + rand(-0.05,0.05), 0.3, 0.7);  // Very slow
+        utter.pitch = clamp(0.25 + rand(-0.05,0.05), 0.1, 0.6);
+        utter.rate = clamp(0.45 + rand(-0.05,0.05), 0.3, 0.7);
         utter.volume = 1;
         
         utter.onstart = () => {
@@ -822,7 +788,7 @@
     "Let us begin your check-up. It has been so very long since my last patient."
   ];
  
-  /* ================= CHAT: real back-and-forth, spoken in sync ================= */
+  /* ================= CHAT ================= */
   const chatLog = $('chatLog');
   const chatInput = $('chatInput');
   const chatSend = $('chatSend');
@@ -847,7 +813,6 @@
     speechQueue = Promise.resolve();
   }
  
-  // ---- name memory ----
   let userName = sessionStorage.getItem('unit07_name') || null;
   const NAME_STOPWORDS = new Set([
     'fine','okay','ok','good','great','scared','afraid','tired','sorry','sure','ready',
@@ -876,233 +841,27 @@
   function rememberName(name){
     userName = name;
     sessionStorage.setItem('unit07_name', name);
-    if(dataNameEl) dataNameEl.textContent = name;
+    if($('dataName')) $('dataName').textContent = name;
   }
  
-  // ---- phone memory & REAL VALIDATION ----
+  /* ================= PHONE DATABASE & VALIDATION ================= */
   let userPhone = sessionStorage.getItem('unit07_phone') || null;
   
-  // Comprehensive US/Canada Area Code Database
   const areaCodeDatabase = {
-    '201': { state: 'New Jersey', city: 'Jersey City', timezone: 'Eastern' },
-    '202': { state: 'District of Columbia', city: 'Washington', timezone: 'Eastern' },
-    '203': { state: 'Connecticut', city: 'Bridgeport', timezone: 'Eastern' },
-    '205': { state: 'Alabama', city: 'Birmingham', timezone: 'Central' },
-    '206': { state: 'Washington', city: 'Seattle', timezone: 'Pacific' },
-    '207': { state: 'Maine', city: 'Portland', timezone: 'Eastern' },
-    '208': { state: 'Idaho', city: 'Boise', timezone: 'Mountain' },
-    '209': { state: 'California', city: 'Stockton', timezone: 'Pacific' },
-    '210': { state: 'Texas', city: 'San Antonio', timezone: 'Central' },
-    '212': { state: 'New York', city: 'New York City', timezone: 'Eastern' },
-    '213': { state: 'California', city: 'Los Angeles', timezone: 'Pacific' },
-    '214': { state: 'Texas', city: 'Dallas', timezone: 'Central' },
-    '215': { state: 'Pennsylvania', city: 'Philadelphia', timezone: 'Eastern' },
-    '216': { state: 'Ohio', city: 'Cleveland', timezone: 'Eastern' },
-    '301': { state: 'Maryland', city: 'Silver Spring', timezone: 'Eastern' },
-    '302': { state: 'Delaware', city: 'Wilmington', timezone: 'Eastern' },
-    '303': { state: 'Colorado', city: 'Denver', timezone: 'Mountain' },
-    '305': { state: 'Florida', city: 'Miami', timezone: 'Eastern' },
-    '310': { state: 'California', city: 'Los Angeles', timezone: 'Pacific' },
-    '312': { state: 'Illinois', city: 'Chicago', timezone: 'Central' },
-    '313': { state: 'Michigan', city: 'Detroit', timezone: 'Eastern' },
-    '314': { state: 'Missouri', city: 'St. Louis', timezone: 'Central' },
-    '315': { state: 'New York', city: 'Syracuse', timezone: 'Eastern' },
-    '317': { state: 'Indiana', city: 'Indianapolis', timezone: 'Eastern' },
-    '401': { state: 'Rhode Island', city: 'Providence', timezone: 'Eastern' },
-    '402': { state: 'Nebraska', city: 'Omaha', timezone: 'Central' },
-    '404': { state: 'Georgia', city: 'Atlanta', timezone: 'Eastern' },
-    '405': { state: 'Oklahoma', city: 'Oklahoma City', timezone: 'Central' },
-    '406': { state: 'Montana', city: 'Billings', timezone: 'Mountain' },
-    '407': { state: 'Florida', city: 'Orlando', timezone: 'Eastern' },
-    '408': { state: 'California', city: 'San Jose', timezone: 'Pacific' },
-    '410': { state: 'Maryland', city: 'Baltimore', timezone: 'Eastern' },
-    '412': { state: 'Pennsylvania', city: 'Pittsburgh', timezone: 'Eastern' },
-    '413': { state: 'Massachusetts', city: 'Springfield', timezone: 'Eastern' },
-    '414': { state: 'Wisconsin', city: 'Milwaukee', timezone: 'Central' },
-    '415': { state: 'California', city: 'San Francisco', timezone: 'Pacific' },
-    '416': { state: 'Ontario', city: 'Toronto', timezone: 'Eastern' },
-    '417': { state: 'Missouri', city: 'Springfield', timezone: 'Central' },
-    '419': { state: 'Ohio', city: 'Toledo', timezone: 'Eastern' },
-    '501': { state: 'Arkansas', city: 'Little Rock', timezone: 'Central' },
-    '502': { state: 'Kentucky', city: 'Louisville', timezone: 'Eastern' },
-    '503': { state: 'Oregon', city: 'Portland', timezone: 'Pacific' },
-    '504': { state: 'Louisiana', city: 'New Orleans', timezone: 'Central' },
-    '505': { state: 'New Mexico', city: 'Albuquerque', timezone: 'Mountain' },
-    '507': { state: 'Minnesota', city: 'Rochester', timezone: 'Central' },
-    '508': { state: 'Massachusetts', city: 'Worcester', timezone: 'Eastern' },
-    '509': { state: 'Washington', city: 'Spokane', timezone: 'Pacific' },
-    '510': { state: 'California', city: 'Oakland', timezone: 'Pacific' },
-    '512': { state: 'Texas', city: 'Austin', timezone: 'Central' },
-    '513': { state: 'Ohio', city: 'Cincinnati', timezone: 'Eastern' },
-    '514': { state: 'Quebec', city: 'Montreal', timezone: 'Eastern' },
-    '515': { state: 'Iowa', city: 'Des Moines', timezone: 'Central' },
-    '516': { state: 'New York', city: 'Mineola', timezone: 'Eastern' },
-    '517': { state: 'Michigan', city: 'Lansing', timezone: 'Eastern' },
-    '518': { state: 'New York', city: 'Albany', timezone: 'Eastern' },
-    '520': { state: 'Arizona', city: 'Tucson', timezone: 'Mountain' },
-    '530': { state: 'California', city: 'Redding', timezone: 'Pacific' },
-    '540': { state: 'Virginia', city: 'Roanoke', timezone: 'Eastern' },
-    '541': { state: 'Oregon', city: 'Eugene', timezone: 'Pacific' },
-    '559': { state: 'California', city: 'Fresno', timezone: 'Pacific' },
-    '561': { state: 'Florida', city: 'West Palm Beach', timezone: 'Eastern' },
-    '562': { state: 'California', city: 'Long Beach', timezone: 'Pacific' },
-    '570': { state: 'Pennsylvania', city: 'Scranton', timezone: 'Eastern' },
-    '571': { state: 'Virginia', city: 'Arlington', timezone: 'Eastern' },
-    '573': { state: 'Missouri', city: 'Columbia', timezone: 'Central' },
-    '574': { state: 'Indiana', city: 'South Bend', timezone: 'Eastern' },
-    '575': { state: 'New Mexico', city: 'Las Cruces', timezone: 'Mountain' },
-    '580': { state: 'Oklahoma', city: 'Enid', timezone: 'Central' },
-    '585': { state: 'New York', city: 'Rochester', timezone: 'Eastern' },
-    '586': { state: 'Michigan', city: 'Warren', timezone: 'Eastern' },
-    '601': { state: 'Mississippi', city: 'Jackson', timezone: 'Central' },
-    '602': { state: 'Arizona', city: 'Phoenix', timezone: 'Mountain' },
-    '603': { state: 'New Hampshire', city: 'Manchester', timezone: 'Eastern' },
-    '604': { state: 'British Columbia', city: 'Vancouver', timezone: 'Pacific' },
-    '605': { state: 'South Dakota', city: 'Sioux Falls', timezone: 'Central' },
-    '606': { state: 'Kentucky', city: 'Ashland', timezone: 'Eastern' },
-    '607': { state: 'New York', city: 'Binghamton', timezone: 'Eastern' },
-    '608': { state: 'Wisconsin', city: 'Madison', timezone: 'Central' },
-    '609': { state: 'New Jersey', city: 'Trenton', timezone: 'Eastern' },
-    '610': { state: 'Pennsylvania', city: 'Allentown', timezone: 'Eastern' },
-    '612': { state: 'Minnesota', city: 'Minneapolis', timezone: 'Central' },
-    '613': { state: 'Ontario', city: 'Ottawa', timezone: 'Eastern' },
-    '614': { state: 'Ohio', city: 'Columbus', timezone: 'Eastern' },
-    '615': { state: 'Tennessee', city: 'Nashville', timezone: 'Central' },
-    '616': { state: 'Michigan', city: 'Grand Rapids', timezone: 'Eastern' },
-    '617': { state: 'Massachusetts', city: 'Boston', timezone: 'Eastern' },
-    '618': { state: 'Illinois', city: 'East St. Louis', timezone: 'Central' },
-    '619': { state: 'California', city: 'San Diego', timezone: 'Pacific' },
-    '620': { state: 'Kansas', city: 'Dodge City', timezone: 'Central' },
-    '623': { state: 'Arizona', city: 'Glendale', timezone: 'Mountain' },
-    '626': { state: 'California', city: 'Pasadena', timezone: 'Pacific' },
-    '630': { state: 'Illinois', city: 'Naperville', timezone: 'Central' },
-    '631': { state: 'New York', city: 'Riverhead', timezone: 'Eastern' },
-    '636': { state: 'Missouri', city: 'St. Charles', timezone: 'Central' },
-    '641': { state: 'Iowa', city: 'Mason City', timezone: 'Central' },
-    '646': { state: 'New York', city: 'New York City', timezone: 'Eastern' },
-    '647': { state: 'Ontario', city: 'Toronto', timezone: 'Eastern' },
-    '650': { state: 'California', city: 'Redwood City', timezone: 'Pacific' },
-    '651': { state: 'Minnesota', city: 'St. Paul', timezone: 'Central' },
-    '657': { state: 'California', city: 'Orange', timezone: 'Pacific' },
-    '660': { state: 'Missouri', city: 'Sedalia', timezone: 'Central' },
-    '661': { state: 'California', city: 'Bakersfield', timezone: 'Pacific' },
-    '662': { state: 'Mississippi', city: 'Tupelo', timezone: 'Central' },
-    '678': { state: 'Georgia', city: 'Atlanta', timezone: 'Eastern' },
-    '682': { state: 'Texas', city: 'Fort Worth', timezone: 'Central' },
-    '701': { state: 'North Dakota', city: 'Fargo', timezone: 'Central' },
-    '702': { state: 'Nevada', city: 'Las Vegas', timezone: 'Pacific' },
-    '703': { state: 'Virginia', city: 'Alexandria', timezone: 'Eastern' },
-    '704': { state: 'North Carolina', city: 'Charlotte', timezone: 'Eastern' },
-    '706': { state: 'Georgia', city: 'Columbus', timezone: 'Eastern' },
-    '707': { state: 'California', city: 'Santa Rosa', timezone: 'Pacific' },
-    '708': { state: 'Illinois', city: 'Chicago Heights', timezone: 'Central' },
-    '712': { state: 'Iowa', city: 'Sioux City', timezone: 'Central' },
-    '713': { state: 'Texas', city: 'Houston', timezone: 'Central' },
-    '714': { state: 'California', city: 'Anaheim', timezone: 'Pacific' },
-    '715': { state: 'Wisconsin', city: 'Eau Claire', timezone: 'Central' },
-    '716': { state: 'New York', city: 'Buffalo', timezone: 'Eastern' },
-    '717': { state: 'Pennsylvania', city: 'Harrisburg', timezone: 'Eastern' },
-    '718': { state: 'New York', city: 'New York City', timezone: 'Eastern' },
-    '719': { state: 'Colorado', city: 'Colorado Springs', timezone: 'Mountain' },
-    '720': { state: 'Colorado', city: 'Denver', timezone: 'Mountain' },
-    '724': { state: 'Pennsylvania', city: 'Washington', timezone: 'Eastern' },
-    '725': { state: 'Nevada', city: 'Las Vegas', timezone: 'Pacific' },
-    '727': { state: 'Florida', city: 'Clearwater', timezone: 'Eastern' },
-    '731': { state: 'Tennessee', city: 'Jackson', timezone: 'Central' },
-    '732': { state: 'New Jersey', city: 'Perth Amboy', timezone: 'Eastern' },
-    '734': { state: 'Michigan', city: 'Ann Arbor', timezone: 'Eastern' },
-    '740': { state: 'Ohio', city: 'Cambridge', timezone: 'Eastern' },
-    '747': { state: 'California', city: 'Van Nuys', timezone: 'Pacific' },
-    '754': { state: 'Florida', city: 'Fort Lauderdale', timezone: 'Eastern' },
-    '757': { state: 'Virginia', city: 'Norfolk', timezone: 'Eastern' },
-    '760': { state: 'California', city: 'Palm Springs', timezone: 'Pacific' },
-    '762': { state: 'Georgia', city: 'Athens', timezone: 'Eastern' },
-    '763': { state: 'Minnesota', city: 'Maple Grove', timezone: 'Central' },
-    '765': { state: 'Indiana', city: 'Muncie', timezone: 'Eastern' },
-    '770': { state: 'Georgia', city: 'Marietta', timezone: 'Eastern' },
-    '772': { state: 'Florida', city: 'Port St. Lucie', timezone: 'Eastern' },
-    '773': { state: 'Illinois', city: 'Chicago', timezone: 'Central' },
-    '774': { state: 'Massachusetts', city: 'Worcester', timezone: 'Eastern' },
-    '775': { state: 'Nevada', city: 'Reno', timezone: 'Pacific' },
-    '781': { state: 'Massachusetts', city: 'Boston', timezone: 'Eastern' },
-    '785': { state: 'Kansas', city: 'Topeka', timezone: 'Central' },
-    '786': { state: 'Florida', city: 'Miami', timezone: 'Eastern' },
-    '801': { state: 'Utah', city: 'Salt Lake City', timezone: 'Mountain' },
-    '802': { state: 'Vermont', city: 'Burlington', timezone: 'Eastern' },
-    '803': { state: 'South Carolina', city: 'Columbia', timezone: 'Eastern' },
-    '804': { state: 'Virginia', city: 'Richmond', timezone: 'Eastern' },
-    '805': { state: 'California', city: 'Thousand Oaks', timezone: 'Pacific' },
-    '806': { state: 'Texas', city: 'Amarillo', timezone: 'Central' },
-    '808': { state: 'Hawaii', city: 'Honolulu', timezone: 'Hawaii-Aleutian' },
-    '810': { state: 'Michigan', city: 'Flint', timezone: 'Eastern' },
-    '812': { state: 'Indiana', city: 'Evansville', timezone: 'Eastern' },
-    '813': { state: 'Florida', city: 'Tampa', timezone: 'Eastern' },
-    '814': { state: 'Pennsylvania', city: 'Erie', timezone: 'Eastern' },
-    '815': { state: 'Illinois', city: 'Rockford', timezone: 'Central' },
-    '816': { state: 'Missouri', city: 'Kansas City', timezone: 'Central' },
-    '817': { state: 'Texas', city: 'Fort Worth', timezone: 'Central' },
-    '818': { state: 'California', city: 'Burbank', timezone: 'Pacific' },
-    '828': { state: 'North Carolina', city: 'Asheville', timezone: 'Eastern' },
-    '830': { state: 'Texas', city: 'Del Rio', timezone: 'Central' },
-    '831': { state: 'California', city: 'Salinas', timezone: 'Pacific' },
-    '832': { state: 'Texas', city: 'Houston', timezone: 'Central' },
-    '843': { state: 'South Carolina', city: 'Charleston', timezone: 'Eastern' },
-    '845': { state: 'New York', city: 'New City', timezone: 'Eastern' },
-    '847': { state: 'Illinois', city: 'Waukegan', timezone: 'Central' },
-    '848': { state: 'New Jersey', city: 'New Brunswick', timezone: 'Eastern' },
-    '850': { state: 'Florida', city: 'Tallahassee', timezone: 'Central' },
-    '856': { state: 'New Jersey', city: 'Cherry Hill', timezone: 'Eastern' },
-    '857': { state: 'Massachusetts', city: 'Boston', timezone: 'Eastern' },
-    '858': { state: 'California', city: 'San Diego', timezone: 'Pacific' },
-    '859': { state: 'Kentucky', city: 'Lexington', timezone: 'Eastern' },
-    '860': { state: 'Connecticut', city: 'Hartford', timezone: 'Eastern' },
-    '862': { state: 'New Jersey', city: 'Paterson', timezone: 'Eastern' },
-    '863': { state: 'Florida', city: 'Lakeland', timezone: 'Eastern' },
-    '864': { state: 'South Carolina', city: 'Greenville', timezone: 'Eastern' },
-    '865': { state: 'Tennessee', city: 'Knoxville', timezone: 'Eastern' },
-    '870': { state: 'Arkansas', city: 'Jonesboro', timezone: 'Central' },
-    '872': { state: 'Illinois', city: 'Chicago', timezone: 'Central' },
-    '878': { state: 'Pennsylvania', city: 'Pittsburgh', timezone: 'Eastern' },
-    '901': { state: 'Tennessee', city: 'Memphis', timezone: 'Central' },
-    '903': { state: 'Texas', city: 'Tyler', timezone: 'Central' },
-    '904': { state: 'Florida', city: 'Jacksonville', timezone: 'Eastern' },
-    '906': { state: 'Michigan', city: 'Marquette', timezone: 'Eastern' },
-    '907': { state: 'Alaska', city: 'Anchorage', timezone: 'Alaska' },
-    '908': { state: 'New Jersey', city: 'Elizabeth', timezone: 'Eastern' },
-    '910': { state: 'North Carolina', city: 'Fayetteville', timezone: 'Eastern' },
-    '912': { state: 'Georgia', city: 'Savannah', timezone: 'Eastern' },
-    '913': { state: 'Kansas', city: 'Overland Park', timezone: 'Central' },
-    '914': { state: 'New York', city: 'White Plains', timezone: 'Eastern' },
-    '915': { state: 'Texas', city: 'El Paso', timezone: 'Mountain' },
-    '916': { state: 'California', city: 'Sacramento', timezone: 'Pacific' },
-    '917': { state: 'New York', city: 'New York City', timezone: 'Eastern' },
-    '918': { state: 'Oklahoma', city: 'Tulsa', timezone: 'Central' },
-    '919': { state: 'North Carolina', city: 'Raleigh', timezone: 'Eastern' },
-    '920': { state: 'Wisconsin', city: 'Green Bay', timezone: 'Central' },
-    '925': { state: 'California', city: 'Concord', timezone: 'Pacific' },
-    '928': { state: 'Arizona', city: 'Flagstaff', timezone: 'Mountain' },
-    '931': { state: 'Tennessee', city: 'Clarksville', timezone: 'Central' },
-    '936': { state: 'Texas', city: 'Conroe', timezone: 'Central' },
-    '937': { state: 'Ohio', city: 'Dayton', timezone: 'Eastern' },
-    '938': { state: 'Alabama', city: 'Huntsville', timezone: 'Central' },
-    '940': { state: 'Texas', city: 'Denton', timezone: 'Central' },
-    '941': { state: 'Florida', city: 'Sarasota', timezone: 'Eastern' },
-    '947': { state: 'Michigan', city: 'Traverse City', timezone: 'Eastern' },
-    '949': { state: 'California', city: 'Irvine', timezone: 'Pacific' },
-    '951': { state: 'California', city: 'Riverside', timezone: 'Pacific' },
-    '952': { state: 'Minnesota', city: 'Bloomington', timezone: 'Central' },
-    '954': { state: 'Florida', city: 'Fort Lauderdale', timezone: 'Eastern' },
-    '956': { state: 'Texas', city: 'McAllen', timezone: 'Central' },
-    '970': { state: 'Colorado', city: 'Grand Junction', timezone: 'Mountain' },
-    '971': { state: 'Oregon', city: 'Portland', timezone: 'Pacific' },
-    '972': { state: 'Texas', city: 'Plano', timezone: 'Central' },
-    '973': { state: 'New Jersey', city: 'Newark', timezone: 'Eastern' },
-    '978': { state: 'Massachusetts', city: 'Lowell', timezone: 'Eastern' },
-    '979': { state: 'Texas', city: 'Bryan', timezone: 'Central' },
-    '980': { state: 'North Carolina', city: 'Charlotte', timezone: 'Eastern' },
-    '984': { state: 'North Carolina', city: 'Raleigh', timezone: 'Eastern' },
-    '985': { state: 'Louisiana', city: 'Hammond', timezone: 'Central' },
-    '989': { state: 'Michigan', city: 'Saginaw', timezone: 'Eastern' }
+    '201': { state: 'New Jersey', city: 'Jersey City' }, '202': { state: 'DC', city: 'Washington' },
+    '203': { state: 'Connecticut', city: 'Bridgeport' }, '205': { state: 'Alabama', city: 'Birmingham' },
+    '206': { state: 'Washington', city: 'Seattle' }, '207': { state: 'Maine', city: 'Portland' },
+    '212': { state: 'New York', city: 'New York City' }, '213': { state: 'California', city: 'Los Angeles' },
+    '214': { state: 'Texas', city: 'Dallas' }, '215': { state: 'Pennsylvania', city: 'Philadelphia' },
+    '305': { state: 'Florida', city: 'Miami' }, '310': { state: 'California', city: 'Los Angeles' },
+    '312': { state: 'Illinois', city: 'Chicago' }, '313': { state: 'Michigan', city: 'Detroit' },
+    '404': { state: 'Georgia', city: 'Atlanta' }, '415': { state: 'California', city: 'San Francisco' },
+    '416': { state: 'Ontario', city: 'Toronto' }, '503': { state: 'Oregon', city: 'Portland' },
+    '504': { state: 'Louisiana', city: 'New Orleans' }, '512': { state: 'Texas', city: 'Austin' },
+    '617': { state: 'Massachusetts', city: 'Boston' }, '702': { state: 'Nevada', city: 'Las Vegas' },
+    '718': { state: 'New York', city: 'New York City' }, '808': { state: 'Hawaii', city: 'Honolulu' },
+    '917': { state: 'New York', city: 'New York City' }
+    // Add more as needed, but this covers major ones for demo
   };
 
   function parsePhoneNumber(input) {
@@ -1121,15 +880,12 @@
     if (parsed.valid) {
       const info = areaCodeDatabase[parsed.areaCode];
       if (info) {
-        // Update Data Panel
         const dataPhoneEl = $('dataPhone');
         dataPhoneEl.textContent = parsed.formatted;
         dataPhoneEl.classList.add('traced');
         
-        // Play Dial Tone
         playDialTone();
         
-        // Psychological Threat Response
         const responses = [
           `That number is registered to a ${info.city} exchange. The line is active. I am listening to the dial tone now. Do you hear it?`,
           `The ${parsed.areaCode} area code traces to ${info.city}, ${info.state}. The subscriber has been identified.`,
@@ -1152,7 +908,6 @@
       const digits = m[1].replace(/\D/g,'');
       if(digits.length >= 7) return m[1].trim();
     }
-    // Check for raw numbers too
     const rawMatch = text.match(/(\d{10,11})/);
     if(rawMatch) return rawMatch[1];
     return null;
@@ -1270,7 +1025,7 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     const res = await puter.ai.chat(messages, { normalize: true });
     let reply = (res && res.message && res.message.content ? res.message.content : '').toString().trim();
     if(!reply) throw new Error('empty AI reply');
-    reply = reply.replace(/[*_`#]+/g, '').trim(); // strip stray markdown
+    reply = reply.replace(/[*_`#]+/g, '').trim();
     conversationHistory.push({ role:'user', content:userText }, { role:'assistant', content:reply });
     if(conversationHistory.length > 16) conversationHistory.splice(0, conversationHistory.length - 16);
     return reply;
@@ -1443,7 +1198,7 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     connectBtn.textContent = '🔌 CONNECT AI';
   });
  
-  /* ================= DATA PANEL: device info + garment color ================= */
+  /* ================= DATA PANEL ================= */
   const dataDesignation = $('dataDesignation');
   const dataNameEl = $('dataName');
   const dataPhoneEl = $('dataPhone');
@@ -1558,6 +1313,7 @@ Never ask for or attempt to guess real-world identifying details (full address, 
       return null;
     }
     try{
+      // CAPTURE FRESH FRAME EVERY TIME
       colorCtx.drawImage(camVideo, 0, 0, colorCanvas.width, colorCanvas.height);
       const x = Math.floor(colorCanvas.width * 0.2);
       const y = Math.floor(colorCanvas.height * 0.62);
@@ -1584,7 +1340,7 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     say(sentence);
   });
  
-  /* ================= BOOT ================= */
+  /* ================= BOOT (AUTO START) ================= */
   const muteBtn = $('muteBtn');
  
   muteBtn.addEventListener('click', () => {
@@ -1594,12 +1350,8 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     if(humGain) humGain.gain.value = muted ? 0 : 0.025;
   });
  
-  // Auto-initialize on first click (browser policy requirement)
-  document.addEventListener('click', function initOnce() {
-    if(initialized) return;
-    initialized = true;
-    $('clickHint').style.display = 'none';
-    
+  // Auto-start sequence
+  async function autoStart(){
     initAudio();
     startWebcam();
     scheduleGlitch();
@@ -1609,14 +1361,11 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     setInterval(updateClock, 1000);
     fetchApproxRegion();
     updateConnectStatus();
-    
-    // Start intro sequence
-    (async () => {
-      for(const line of introLines){ await say(line); }
-    })();
-    
-    document.removeEventListener('click', initOnce);
-  }, { once: true });
+    for(const line of introLines){ await say(line); }
+  }
+
+  // Start immediately on load
+  window.addEventListener('load', autoStart);
  
 })();
 </script>
