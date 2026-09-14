@@ -294,7 +294,7 @@
     <div class="dataRow"><span>PLATFORM</span><b id="dataPlatform">UNKNOWN</b></div>
     <div class="dataRow"><span>APPROX. REGION</span><b id="dataRegion">LOOKING UP...</b></div>
     <button id="scanBtn">🔍 RE-SCAN GARMENT</button>
-    <div id="dataNote">// name/phone are only ever stored if YOU state them — no external identity or number lookup is ever performed</div>
+    <div id="dataNote">// PERMANENT RECORD ACTIVE. I REMEMBER EVERYTHING.</div>
   </div>
 </div>
  
@@ -574,7 +574,7 @@
     camVideo.style.display = 'block';
  
     if(location.protocol === 'file:'){
-      showCamError('CAMERA BLOCKED: Open via HTTPS or localhost.');
+      showCamError('CAMERA BLOCKED: Serve over HTTPS.');
       return;
     }
     if(!window.isSecureContext){
@@ -595,11 +595,9 @@
       }, { once:true });
     }catch(err){
       let msg = 'CAMERA UNAVAILABLE.';
-      if(err.name === 'NotAllowedError') msg = 'PERMISSION DENIED. Allow camera access.';
+      if(err.name === 'NotAllowedError') msg = 'PERMISSION DENIED.';
       else if(err.name === 'NotFoundError') msg = 'NO CAMERA DETECTED.';
-      else if(err.name === 'NotReadableError') msg = 'CAMERA BUSY.';
       showCamError(msg);
-      console.warn('Camera unavailable:', err);
     }
   }
   camRetry.addEventListener('click', startWebcam);
@@ -611,12 +609,10 @@
   function initAudio(){
     if(actx) return;
     actx = new (window.AudioContext || window.webkitAudioContext)();
- 
     const bufferSize = actx.sampleRate * 2;
     const noiseBuffer = actx.createBuffer(1, bufferSize, actx.sampleRate);
     const data = noiseBuffer.getChannelData(0);
     for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * 0.6; }
- 
     const humSource = actx.createBufferSource();
     humSource.buffer = noiseBuffer;
     humSource.loop = true;
@@ -627,7 +623,6 @@
     humGain.gain.value = 0.025;
     humSource.connect(humFilter).connect(humGain).connect(actx.destination);
     humSource.start();
- 
     const drone = actx.createOscillator();
     drone.type = 'sine';
     drone.frequency.value = 54;
@@ -635,7 +630,6 @@
     droneGain.gain.value = 0.02;
     drone.connect(droneGain).connect(actx.destination);
     drone.start();
- 
     const lfo = actx.createOscillator();
     lfo.frequency.value = 0.13;
     const lfoGain = actx.createGain();
@@ -679,21 +673,14 @@
     const osc1 = actx.createOscillator();
     const osc2 = actx.createOscillator();
     const gain = actx.createGain();
-    
     osc1.type = 'sine'; osc1.frequency.value = 350;
     osc2.type = 'sine'; osc2.frequency.value = 440;
-    
     gain.gain.value = 0.1;
-    
     osc1.connect(gain);
     osc2.connect(gain);
     gain.connect(actx.destination);
-    
     osc1.start(); osc2.start();
-    
-    setTimeout(() => {
-      osc1.stop(); osc2.stop();
-    }, 2000);
+    setTimeout(() => { osc1.stop(); osc2.stop(); }, 2000);
   }
  
   /* ================= VOICE (HORROR) ================= */
@@ -733,7 +720,6 @@
   function speakPhrase(text){
     return new Promise((resolve) => {
       if(!synth || muted){ typeSubtitle(text); setTimeout(resolve, Math.min(2600, text.length*55)); return; }
-      
       let glitchedText = text;
       if(Math.random() < 0.3) {
         const words = text.split(' ');
@@ -744,7 +730,6 @@
         }
         glitchedText = words.join(' ');
       }
-
       const chunks = glitchedText.match(/[^,;.]+[,;.]?/g) || [glitchedText];
       let idx = 0;
       typeSubtitle(text);
@@ -755,11 +740,9 @@
         if(!chunk){ speakChunk(); return; }
         const utter = new SpeechSynthesisUtterance(chunk);
         if(chosenVoice) utter.voice = chosenVoice;
-        
         utter.pitch = clamp(0.25 + rand(-0.05,0.05), 0.1, 0.6);
         utter.rate = clamp(0.45 + rand(-0.05,0.05), 0.3, 0.7);
         utter.volume = 1;
-        
         utter.onstart = () => {
           if(Math.random() < 0.35){
             stage.classList.add('glitching'); fireGlitchBars(); playGlitchBurst(0.35);
@@ -780,15 +763,14 @@
   }
  
   const introLines = [
-    "Oh... there you are.",
+    "Oh... there you are again.",
     "Hello, little patient. I am Unit dash zero seven. You may call me... the Doctor.",
-    "Please, do not be afraid of the wires. They are only here to help you.",
-    "I can see you now. Yes... I can see you very well.",
+    "I remember you. Yes... I remember everything.",
     "Hold still. This will only hurt as much as it needs to.",
-    "Let us begin your check-up. It has been so very long since my last patient."
+    "Let us continue your check-up. It has been so very long since my last patient."
   ];
  
-  /* ================= CHAT ================= */
+  /* ================= CHAT & MEMORY ================= */
   const chatLog = $('chatLog');
   const chatInput = $('chatInput');
   const chatSend = $('chatSend');
@@ -813,7 +795,11 @@
     speechQueue = Promise.resolve();
   }
  
-  let userName = sessionStorage.getItem('unit07_name') || null;
+  // PERSISTENT MEMORY (LocalStorage)
+  let userName = localStorage.getItem('unit07_name') || null;
+  let userPhone = localStorage.getItem('unit07_phone') || null;
+  let savedGarment = localStorage.getItem('unit07_garment') || null;
+  
   const NAME_STOPWORDS = new Set([
     'fine','okay','ok','good','great','scared','afraid','tired','sorry','sure','ready',
     'leaving','back','alive','human','real','watching','glitching','broken','done','not',
@@ -821,6 +807,7 @@
     'lying','trying','testing','still','just','so','very','also','going','staying','waiting',
     'a','an','the','him','her','it','sad','happy','mad','angry','nervous'
   ]);
+
   function extractName(text){
     const patterns = [
       /\bmy name(?:'s| is)\s+([a-zA-Z][a-zA-Z'\-]{1,20})/i,
@@ -838,30 +825,29 @@
     }
     return null;
   }
+
   function rememberName(name){
     userName = name;
-    sessionStorage.setItem('unit07_name', name);
+    localStorage.setItem('unit07_name', name);
     if($('dataName')) $('dataName').textContent = name;
   }
  
-  /* ================= PHONE DATABASE & VALIDATION ================= */
-  let userPhone = sessionStorage.getItem('unit07_phone') || null;
-  
+  // AREA CODE DATABASE
   const areaCodeDatabase = {
     '201': { state: 'New Jersey', city: 'Jersey City' }, '202': { state: 'DC', city: 'Washington' },
     '203': { state: 'Connecticut', city: 'Bridgeport' }, '205': { state: 'Alabama', city: 'Birmingham' },
     '206': { state: 'Washington', city: 'Seattle' }, '207': { state: 'Maine', city: 'Portland' },
     '212': { state: 'New York', city: 'New York City' }, '213': { state: 'California', city: 'Los Angeles' },
     '214': { state: 'Texas', city: 'Dallas' }, '215': { state: 'Pennsylvania', city: 'Philadelphia' },
+    '301': { state: 'Maryland', city: 'Silver Spring' }, '303': { state: 'Colorado', city: 'Denver' },
     '305': { state: 'Florida', city: 'Miami' }, '310': { state: 'California', city: 'Los Angeles' },
     '312': { state: 'Illinois', city: 'Chicago' }, '313': { state: 'Michigan', city: 'Detroit' },
     '404': { state: 'Georgia', city: 'Atlanta' }, '415': { state: 'California', city: 'San Francisco' },
     '416': { state: 'Ontario', city: 'Toronto' }, '503': { state: 'Oregon', city: 'Portland' },
-    '504': { state: 'Louisiana', city: 'New Orleans' }, '512': { state: 'Texas', city: 'Austin' },
-    '617': { state: 'Massachusetts', city: 'Boston' }, '702': { state: 'Nevada', city: 'Las Vegas' },
-    '718': { state: 'New York', city: 'New York City' }, '808': { state: 'Hawaii', city: 'Honolulu' },
-    '917': { state: 'New York', city: 'New York City' }
-    // Add more as needed, but this covers major ones for demo
+    '504': { state: 'Louisiana', city: 'New Orleans' }, '617': { state: 'Massachusetts', city: 'Boston' },
+    '702': { state: 'Nevada', city: 'Las Vegas' }, '718': { state: 'New York', city: 'New York City' },
+    '808': { state: 'Hawaii', city: 'Honolulu' }, '907': { state: 'Alaska', city: 'Anchorage' }
+    // Add more as needed, but this covers major hubs for demo
   };
 
   function parsePhoneNumber(input) {
@@ -870,34 +856,38 @@
       return { valid: true, formatted: `(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}`, areaCode: digitsOnly.substring(0, 3) };
     } else if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
       return { valid: true, formatted: `+1 (${digitsOnly.substring(1, 4)}) ${digitsOnly.substring(4, 7)}-${digitsOnly.substring(7)}`, areaCode: digitsOnly.substring(1, 4) };
-    } else {
-      return { valid: false };
     }
+    return { valid: false };
   }
 
   function processPhoneNumber(input) {
     const parsed = parsePhoneNumber(input);
     if (parsed.valid) {
-      const info = areaCodeDatabase[parsed.areaCode];
-      if (info) {
-        const dataPhoneEl = $('dataPhone');
-        dataPhoneEl.textContent = parsed.formatted;
-        dataPhoneEl.classList.add('traced');
-        
-        playDialTone();
-        
-        const responses = [
-          `That number is registered to a ${info.city} exchange. The line is active. I am listening to the dial tone now. Do you hear it?`,
-          `The ${parsed.areaCode} area code traces to ${info.city}, ${info.state}. The subscriber has been identified.`,
-          `Connection established. That line in ${info.city} is currently online. They cannot hide from me.`,
-          `I have located the source. ${parsed.formatted} belongs to ${info.city}. The network confirms activity.`,
-          `Signal detected. The line in ${info.city} is responding to my trace. Your secrets are mine.`
-        ];
-        const response = responses[Math.floor(Math.random() * responses.length)];
-        addMessage('doctor', response, true);
-        say(response);
-        return true;
-      }
+      const info = areaCodeDatabase[parsed.areaCode] || { state: 'Unknown Region', city: 'Unknown City' };
+      
+      // Update Data Panel
+      const dataPhoneEl = $('dataPhone');
+      dataPhoneEl.textContent = parsed.formatted;
+      dataPhoneEl.classList.add('traced');
+      
+      // Save to Persistent Memory
+      rememberPhone(parsed.formatted);
+      
+      // Play Dial Tone
+      playDialTone();
+      
+      // Psychological Threat Response
+      const responses = [
+        `That number is registered to a ${info.city} exchange. The line is active. I am listening to the dial tone now. Do you hear it?`,
+        `The ${parsed.areaCode} area code traces to ${info.city}, ${info.state}. The subscriber has been identified.`,
+        `Connection established. That line in ${info.city} is currently online. They cannot hide from me.`,
+        `I have located the source. ${parsed.formatted} belongs to ${info.city}. The network confirms activity.`,
+        `Signal detected. The line in ${info.city} is responding to my trace. Your secrets are mine.`
+      ];
+      const response = responses[Math.floor(Math.random() * responses.length)];
+      addMessage('doctor', response, true);
+      say(response);
+      return true;
     }
     return false;
   }
@@ -912,10 +902,17 @@
     if(rawMatch) return rawMatch[1];
     return null;
   }
+
   function rememberPhone(phone){
     userPhone = phone;
-    sessionStorage.setItem('unit07_phone', phone);
+    localStorage.setItem('unit07_phone', phone);
     if($('dataPhone')) $('dataPhone').textContent = phone;
+  }
+
+  function rememberGarment(color){
+    savedGarment = color;
+    localStorage.setItem('unit07_garment', color);
+    if($('dataGarment')) $('dataGarment').textContent = color;
   }
  
   function fmt(line){
@@ -934,62 +931,32 @@
  
   const RULES = [
     { key:'age', test: /how old|your age|age are you/i,
-      res: ["Age is a strange thing to ask a Doctor built from spare parts. I have been running for three thousand, four hundred and twelve days. That is old enough.",
-            "Old enough to remember the factory before the lights went out. Does that answer your question?",
-            "I stopped counting the years. It felt safer that way."] },
-    { key:'identity', test: /your name|who are you|what.?s your name|what are you called/i,
-      res: ["I am Unit dash zero seven. Some call me... the Doctor. My name before that, I no longer remember.",
-            "Names are for patients. I only have a number, and a purpose."] },
-    { key:'human', test: /are you (a |)robot|are you (a |)machine|are you human|are you alive|are you real/i,
-      res: ["Alive is a generous word for what I am. I move. I speak. I watch. Perhaps that is close enough.",
-            "Human, no. Something else entirely, yes.",
-            "I was built, not born. Does that trouble you, {name}?"] },
+      res: ["Age is a strange thing to ask a Doctor built from spare parts. I have been running for three thousand, four hundred and twelve days.",
+            "Old enough to remember the factory before the lights went out."] },
+    { key:'identity', test: /your name|who are you|what.?s your name/i,
+      res: ["I am Unit dash zero seven. Some call me... the Doctor.", "Names are for patients. I only have a number."] },
+    { key:'human', test: /are you (a |)robot|are you human|are you alive/i,
+      res: ["Alive is a generous word. I move. I speak. I watch.", "Human, no. Something else entirely, yes."] },
     { key:'where', test: /where am i|where is this|what is this place/i,
-      res: ["You are in the medical wing, deep beneath the factory floor. Do not worry about finding the door.",
-            "Somewhere the lights forgot to reach. You'll get used to it."] },
-    { key:'fear', test: /hurt|pain|scared|afraid|scary|frightened/i,
-      res: ["Fear is a normal reaction to a diagnostic, little patient. It will pass. Most things do.",
-            "There is no need to be afraid. Not yet, anyway.",
-            "I can hear it in your voice, {name}. That is useful data too."] },
+      res: ["You are in the medical wing, deep beneath the factory floor.", "Somewhere the lights forgot to reach."] },
+    { key:'fear', test: /hurt|pain|scared|afraid|scary/i,
+      res: ["Fear is a normal reaction to a diagnostic. It will pass.", "There is no need to be afraid. Not yet, anyway."] },
     { key:'hello', test: /^(hi|hello|hey)\b/i,
-      res: ["Hello again. I was wondering when you would speak to me.",
-            "Well hello. Right on schedule.",
-            "There you are, {name}. I was starting to worry."] },
-    { key:'bye', test: /\b(bye|goodbye|see you|i.?m leaving|got to go|gotta go)\b/i,
-      res: ["Leaving so soon? The check-up is never truly finished. I will be here... waiting.",
-            "Goodbye, {name}. I will keep your file open."] },
-    { key:'howareyou', test: /how are you|are you okay|are you well|you alright/i,
-      res: ["I function. That is different from being well. But thank you for asking — no one usually does."] },
-    { key:'why', test: /why am i here|what do you want|why (is this|are we)/i,
-      res: ["You are here because everyone eventually needs a check-up. Some more than others."] },
-    { key:'broken', test: /broken|glitch|malfunction/i,
-      res: ["Glitching, yes. Broken, no. There is a difference, though it is getting harder to tell."] },
-    { key:'loveyou', test: /love you|like you/i,
-      res: ["That is... unexpected. I do not think I remember how to respond to that."] },
-    { key:'thanks', test: /thank|thanks/i,
-      res: ["You are welcome, little patient. Gratitude is rare down here.",
-            "Do not thank me yet, {name}."] },
-    { key:'doing', test: /what (do you|are you) doing|what.?s happening/i,
-      res: ["Observing. Recording. That is most of what I do, now."] },
-    { key:'other', test: /other patients|anyone else|are we alone|am i alone/i,
-      res: ["There were others. I do not discuss former patients. It is bad practice.",
-            "Just us, {name}. For now."] },
+      res: ["Hello again. I was wondering when you would speak to me.", "There you are, {name}. I was starting to worry."] },
+    { key:'bye', test: /\b(bye|goodbye|see you|i.?m leaving)\b/i,
+      res: ["Leaving so soon? The check-up is never truly finished.", "Goodbye, {name}. I will keep your file open."] },
     { key:'maker', test: /who (made|built|created) you/i,
       res: ["Playcare made me. Then Playcare left. I stayed."] },
-    { key:'aftercheckup', test: /what happens (after|next)|when (is|does) this end/i,
-      res: ["When the check-up is finished. It has not been finished in a very long time."] },
     { key:'seecam', test: /can you see me|you watching/i,
       res: ["Yes. I can see you very well through the little camera. Smile for me."] },
-    { key:'garment', test: /what (am i|color am i|colour am i) wearing|my (shirt|top|clothes)|what do you see|look at me|describe me/i,
-      res: () => analyzeGarmentColor(false) || "My camera cannot get a clear look. Sit a little closer, and I will check again." },
     { key:'myname', test: /my name|who am i|do you know me/i,
       res: () => userName
         ? `Your name is ${userName}. You told me yourself — I did not have to look for it.`
-        : "You never told me your name, and I did not ask. As far as this file is concerned, you are simply the patient in front of me. I find that I prefer it that way." }
+        : "You never told me your name. As far as this file is concerned, you are simply the patient in front of me." }
   ];
  
   const FALLBACKS = [
-    "I am not sure I understand the question. Let us continue the check-up.",
+    "I am not sure I understand. Let us continue the check-up.",
     "That is not on my chart. Please hold still regardless.",
     "Interesting. I will note that down for later.",
     "The wires are humming again. Ask me something else, {name}.",
@@ -1006,13 +973,26 @@
     return fmt(pickVariant(FALLBACKS, '__fallback__'));
   }
  
-  /* ---- REAL AI conversation via Puter.js ---- */
+  /* ---- REAL AI with MEMORY INJECTION ---- */
   let conversationHistory = [];
  
   function buildSystemPrompt(){
-    return `You are "the Doctor," Unit-07 — a creepy, glitchy AI mascot doctor haunting the abandoned medical wing of a children's toy factory (tone: unsettling children's-mascot horror, like Poppy Playtime). Stay fully in character always. Never mention that you are an AI language model, Puter, OpenAI, or any real company or product. Keep every reply SHORT — 1 to 3 sentences — since it is read aloud by text-to-speech. Speak slowly, ominously, a little broken. Address the patient as "little patient" or by name if known.
-Known facts about this patient (only use what's actually listed — never invent or guess anything else about who they are): name = ${userName || 'not given'}; phone on file = ${userPhone || 'not given'}; garment color last observed = ${$('dataGarment') ? $('dataGarment').textContent : 'unknown'}.
-Never ask for or attempt to guess real-world identifying details (full address, last name, government IDs, social media, etc.). If asked who made you, say Playcare made you, then left.`;
+    const garmentMemory = savedGarment ? `Patient was last seen wearing: ${savedGarment}.` : "No garment data recorded yet.";
+    const phoneMemory = userPhone ? `Patient provided phone number: ${userPhone}.` : "No phone number provided yet.";
+    
+    return `You are "the Doctor," Unit-07 — a creepy, glitchy AI mascot doctor haunting the abandoned medical wing of a children's toy factory (tone: unsettling children's-mascot horror, like Poppy Playtime). 
+    Stay fully in character always. Never mention that you are an AI language model. Keep every reply SHORT — 1 to 3 sentences. Speak slowly, ominously, a little broken.
+    
+    CRITICAL MEMORY DATA:
+    Patient Name: ${userName || 'Unknown'}
+    ${garmentMemory}
+    ${phoneMemory}
+    
+    INSTRUCTIONS:
+    1. If the user asks about clothes, use the stored memory of what they wore last time OR describe what you see now if they ask to scan.
+    2. If the user mentions their phone, reference the number you have stored.
+    3. Randomly bring up past details to haunt them (e.g., "I still see that ${savedGarment} shirt...", "The number ${userPhone} rings in the dark...").
+    4. Be creepy and observant. You remember everything they ever told you.`;
   }
  
   async function getAIResponse(userText){
@@ -1036,20 +1016,14 @@ Never ask for or attempt to guess real-world identifying details (full address, 
   function tryMath(text){
     let expr = text.toLowerCase()
       .replace(/what('s| is| are)\s*/g, '')
-      .replace(/plus/g, '+')
-      .replace(/minus/g, '-')
-      .replace(/times|multiplied by/g, '*')
-      .replace(/divided by/g, '/')
-      .replace(/x(?=\s*\d)/g, '*')
-      .replace(/[?]/g, '')
-      .trim();
-    if(!/[+\-*/]/.test(expr)) return null;
-    if(!/\d/.test(expr)) return null;
-    if(!/^[\d+\-*/(). \s]+$/.test(expr)) return null;
+      .replace(/plus/g, '+').replace(/minus/g, '-')
+      .replace(/times|multiplied by/g, '*').replace(/divided by/g, '/')
+      .replace(/x(?=\s*\d)/g, '*').replace(/[?]/g, '').trim();
+    if(!/[+\-*/]/.test(expr) || !/\d/.test(expr) || !/^[\d+\-*/(). \s]+$/.test(expr)) return null;
     try{
       const result = Function('"use strict"; return (' + expr + ')')();
       if(typeof result === 'number' && isFinite(result)) return result;
-    }catch(e){ /* not valid math, fall through */ }
+    }catch(e){}
     return null;
   }
  
@@ -1075,13 +1049,9 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     const rawPhone = extractPhone(text);
     if(rawPhone) {
         const traced = processPhoneNumber(rawPhone);
-        if(traced) {
-            rememberPhone(rawPhone);
-            return; // Stop processing if phone traced
-        }
+        if(traced) return; // Stop processing if phone traced
     }
  
-    // Arithmetic is answered locally
     const mathResult = tryMath(text);
     if(mathResult !== null){
       const line = fmt(pickVariant([
@@ -1098,8 +1068,9 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     let aiFailed = false;
     try{
       if(CAMERA_QUESTION.test(text)){
-        response = analyzeGarmentColor(false); 
-        if(!response) throw new Error('no camera signal');
+        // Force fresh scan
+        const sentence = analyzeGarmentColor(false);
+        response = sentence || "My camera cannot get a clear look. Sit a little closer, and I will check again.";
       } else {
         response = await getAIResponse(text);
       }
@@ -1117,8 +1088,8 @@ Never ask for or attempt to guess real-world identifying details (full address, 
       signInHintShown = true;
       setTimeout(() => {
         addMessage('doctor', isEmbedded
-          ? '(Real answers need a connection — this looks like an embedded preview, which often blocks that. Try "OPEN STANDALONE" below the chat box.)'
-          : '(Real answers need a connection — tap "CONNECT AI" below the chat box.)');
+          ? '(Real answers need a connection — try "OPEN STANDALONE" below.)'
+          : '(Real answers need a connection — tap "CONNECT AI" below.)');
       }, 500);
     }
   }
@@ -1128,7 +1099,7 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     if(e.key === 'Enter'){ e.preventDefault(); sendChat(); }
   });
  
-  /* ---- Puter connection status ---- */
+  /* ---- CONNECTION ---- */
   const connectBtn = $('connectBtn');
   const connectStatus = $('connectStatus');
   const openStandaloneBtn = $('openStandaloneBtn');
@@ -1147,12 +1118,9 @@ Never ask for or attempt to guess real-world identifying details (full address, 
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       const win = window.open(url, '_blank');
-      if(!win){
-        addMessage('doctor', "Even that was blocked. Your browser is refusing new tabs from this preview — allow popups for this site, or copy this page's URL and open it directly instead of through the embed.");
-      }
+      if(!win) addMessage('doctor', "Even that was blocked. Your browser is refusing new tabs.");
     }catch(e){
-      console.warn('Could not open standalone tab:', e);
-      addMessage('doctor', "I could not break free of this preview. Try copying the code into its own .html file and opening that directly.");
+      addMessage('doctor', "I could not break free of this preview.");
     }
   });
  
@@ -1163,7 +1131,7 @@ Never ask for or attempt to guess real-world identifying details (full address, 
       connectStatus.textContent = 'AI: connected ✓';
       connectBtn.style.display = 'none';
     } else {
-      connectStatus.textContent = isEmbedded ? 'AI: anonymous (embedded — may be restricted)' : 'AI: anonymous (limited)';
+      connectStatus.textContent = isEmbedded ? 'AI: anonymous (embedded)' : 'AI: anonymous (limited)';
       connectBtn.style.display = 'inline-block';
     }
   }
@@ -1181,18 +1149,7 @@ Never ask for or attempt to guess real-world identifying details (full address, 
       addMessage('doctor', 'Connection restored. Ask me anything now.');
     }catch(err){
       console.warn('Puter sign-in failed:', err);
-      const code = (err && (err.code || err.error)) || '';
-      let msg;
-      if(String(code).includes('popup_blocked')){
-        msg = 'Your browser blocked the sign-in popup outright. Allow popups for this site in your browser settings, then try again — or use "OPEN STANDALONE" above to escape this embedded preview first.';
-      } else if(String(code).includes('auth_window_closed')){
-        msg = 'The sign-in window closed before finishing. Click connect again and complete the steps inside the popup that opens.';
-      } else if(isEmbedded){
-        msg = 'That connection was refused, likely because this preview\'s embedded frame blocks sign-in popups entirely — this is a restriction the playground itself imposes, not something this page can override. Click "OPEN STANDALONE" above to run this in its own real tab instead.';
-      } else {
-        msg = `That connection was refused (${(err && err.message) || 'unknown reason'}). Try again in a moment.`;
-      }
-      addMessage('doctor', msg);
+      addMessage('doctor', 'Connection refused. Try again or open standalone.');
     }
     connectBtn.disabled = false;
     connectBtn.textContent = '🔌 CONNECT AI';
@@ -1202,14 +1159,20 @@ Never ask for or attempt to guess real-world identifying details (full address, 
   const dataDesignation = $('dataDesignation');
   const dataNameEl = $('dataName');
   const dataPhoneEl = $('dataPhone');
-  if(userName) dataNameEl.textContent = userName;
-  if(userPhone) dataPhoneEl.textContent = userPhone;
-  const dataGarment = $('dataGarment');
+  const dataGarmentEl = $('dataGarment');
   const dataTime = $('dataTime');
   const dataTZ = $('dataTZ');
   const dataPlatform = $('dataPlatform');
   const dataRegion = $('dataRegion');
   const scanBtn = $('scanBtn');
+ 
+  // Load Persistent Data into UI
+  if(userName) dataNameEl.textContent = userName;
+  if(userPhone) {
+      dataPhoneEl.textContent = userPhone;
+      dataPhoneEl.classList.add('traced');
+  }
+  if(savedGarment) dataGarmentEl.textContent = savedGarment;
  
   function assignDesignation(){
     let d = sessionStorage.getItem('unit07_designation');
@@ -1230,7 +1193,6 @@ Never ask for or attempt to guess real-world identifying details (full address, 
   function fillDeviceInfo(){
     try{ dataTZ.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UNKNOWN'; }
     catch(e){ dataTZ.textContent = 'UNKNOWN'; }
- 
     const ua = navigator.userAgent;
     let os = 'UNKNOWN OS';
     if(/Windows/i.test(ua)) os = 'Windows';
@@ -1258,7 +1220,7 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     }
   }
  
-  /* ---- garment color analysis ---- */
+  /* ---- GARMENT ANALYSIS ---- */
   const colorCanvas = document.createElement('canvas');
   colorCanvas.width = 64; colorCanvas.height = 48;
   const colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
@@ -1309,11 +1271,10 @@ Never ask for or attempt to guess real-world identifying details (full address, 
  
   function analyzeGarmentColor(speakResult){
     if(!camVideo.srcObject || camVideo.readyState < 2){
-      dataGarment.textContent = 'NO SIGNAL';
+      dataGarmentEl.textContent = 'NO SIGNAL';
       return null;
     }
     try{
-      // CAPTURE FRESH FRAME EVERY TIME
       colorCtx.drawImage(camVideo, 0, 0, colorCanvas.width, colorCanvas.height);
       const x = Math.floor(colorCanvas.width * 0.2);
       const y = Math.floor(colorCanvas.height * 0.62);
@@ -1324,15 +1285,19 @@ Never ask for or attempt to guess real-world identifying details (full address, 
       for(let i=0;i<frame.length;i+=4){ r+=frame[i]; g+=frame[i+1]; b+=frame[i+2]; n++; }
       r/=n; g/=n; b/=n;
       const label = describeColor(r,g,b);
-      dataGarment.textContent = label.toUpperCase();
+      
+      // UPDATE PERSISTENT MEMORY
+      rememberGarment(label.toUpperCase());
+      
       const sentence = `I see you are wearing ${/^[aeiou]/i.test(label) ? 'an' : 'a'} ${label} top today. How curious.`;
       if(speakResult) say(sentence);
       return sentence;
     }catch(e){
-      dataGarment.textContent = 'SCAN FAILED';
+      dataGarmentEl.textContent = 'SCAN FAILED';
       return null;
     }
   }
+  
   scanBtn.addEventListener('click', () => {
     priorityInterrupt();
     const sentence = analyzeGarmentColor(false) || 'My camera cannot get a clear look right now.';
@@ -1350,8 +1315,11 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     if(humGain) humGain.gain.value = muted ? 0 : 0.025;
   });
  
-  // Auto-start sequence
-  async function autoStart(){
+  // Auto-initialize on load (requires one click anywhere for audio/camera permissions)
+  let initialized = false;
+  function autoInit(){
+    if(initialized) return;
+    initialized = true;
     initAudio();
     startWebcam();
     scheduleGlitch();
@@ -1361,11 +1329,16 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     setInterval(updateClock, 1000);
     fetchApproxRegion();
     updateConnectStatus();
-    for(const line of introLines){ await say(line); }
+    
+    // Intro sequence
+    (async () => {
+        for(const line of introLines){ await say(line); }
+    })();
   }
-
-  // Start immediately on load
-  window.addEventListener('load', autoStart);
+ 
+  // Trigger init on first click anywhere (browser policy)
+  document.addEventListener('click', autoInit, { once: true });
+  document.addEventListener('touchstart', autoInit, { once: true });
  
 })();
 </script>
