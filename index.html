@@ -3,24 +3,26 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UNIT-07 // PLAYCARE MEDICAL WING</title>
+<title>UNIT-07 // OBSERVATION DECK</title>
 <script src="https://js.puter.com/v2/"></script>
 <style>
   :root{
-    --void: #030309;
-    --deep: #060a18;
-    --mid:  #0c1330;
+    --void: #020205;
+    --deep: #050810;
+    --mid:  #0a1020;
     --star: #c9d4ff;
-    --sclera-a: #cdc6b8;
-    --sclera-b: #726c60;
-    --iris-mid: #4a3826;
-    --iris-dark: #1c140c;
-    --pupil: #030201;
-    --fringe-red: rgba(255,50,60,0.55);
-    --fringe-cyan: rgba(70,200,255,0.4);
-    --text-dim: #7c86a0;
+    --sclera-a: #e8e6df;
+    --sclera-b: #9ca3a0;
+    --iris-mid: #5c4a35;
+    --iris-dark: #1a1208;
+    --pupil: #000000;
+    --fringe-red: rgba(255,40,50,0.6);
+    --fringe-cyan: rgba(60,220,255,0.4);
+    --text-dim: #6a7590;
     --accent: #cfd8ee;
     --alert: #ff3333;
+    --sidebar-bg: #080a12;
+    --sidebar-border: #1a2030;
   }
  
   *{ box-sizing: border-box; }
@@ -31,15 +33,64 @@
     overflow:hidden;
     font-family: 'Courier New', Courier, monospace;
     cursor: crosshair;
+    color: var(--accent);
   }
- 
+
+  /* ================= SIDEBAR ================= */
+  #sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: 300px;
+    height: 100vh;
+    background: var(--sidebar-bg);
+    border-right: 2px solid var(--sidebar-border);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    box-shadow: 5px 0 30px rgba(0,0,0,0.8);
+  }
+  #sidebar.open { transform: translateX(0); }
+  
+  #sidebarHeader {
+    padding: 20px;
+    background: #0f1420;
+    border-bottom: 1px solid var(--sidebar-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  #sidebarTitle { font-weight: bold; letter-spacing: 2px; font-size: 14px; color: var(--alert); }
+  #closeSidebar {
+    background: none; border: 1px solid var(--text-dim); color: var(--text-dim);
+    cursor: pointer; padding: 5px 10px; font-family: inherit; font-size: 10px;
+  }
+  #closeSidebar:hover { border-color: var(--alert); color: var(--alert); }
+
+  #sidebarContent { padding: 20px; overflow-y: auto; flex: 1; }
+  .sb-section { margin-bottom: 25px; }
+  .sb-title { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 10px; border-bottom: 1px dashed var(--sidebar-border); padding-bottom: 5px; }
+  .sb-item { font-size: 12px; margin-bottom: 8px; line-height: 1.4; }
+  .sb-item b { color: var(--accent); }
+  .sb-log { font-size: 10px; color: #4a5565; font-style: italic; max-height: 150px; overflow-y: auto; }
+  
+  #toggleSidebarBtn {
+    position: fixed; top: 20px; left: 20px; z-index: 90;
+    background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
+    color: var(--text-dim); padding: 8px 12px; cursor: pointer;
+    font-family: inherit; font-size: 10px; letter-spacing: 1px;
+    transition: 0.2s;
+  }
+  #toggleSidebarBtn:hover { border-color: var(--accent); color: var(--accent); }
+
   /* ================= STAGE / BACKGROUND ================= */
   #stage{
     position:relative;
     width:100vw; height:100vh;
     display:flex; align-items:center; justify-content:center;
-    background:
-      radial-gradient(ellipse at 50% 42%, var(--mid) 0%, var(--deep) 55%, var(--void) 100%);
+    background: radial-gradient(ellipse at 50% 42%, var(--mid) 0%, var(--deep) 55%, var(--void) 100%);
+    transition: filter 0.1s;
   }
   #stage.glitching{ animation: stageGlitch 200ms steps(2,end); }
   @keyframes stageGlitch{
@@ -51,61 +102,32 @@
   }
  
   #starCanvas{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; }
- 
   #staticCanvas{
     position:fixed; inset:0; width:100%; height:100%;
-    pointer-events:none; mix-blend-mode: overlay; opacity:0.18; z-index:2;
+    pointer-events:none; mix-blend-mode: overlay; opacity:0.15; z-index:2;
   }
- 
   .glitchBar{
     position:fixed; left:0; width:100%; height:2px;
     background: rgba(230,235,250,0.35);
-    z-index: 25; pointer-events:none;
-    mix-blend-mode: screen;
-    opacity:0;
+    z-index: 25; pointer-events:none; mix-blend-mode: screen; opacity:0;
   }
- 
   #vignette{ position:fixed; inset:0; pointer-events:none; z-index:26; box-shadow: inset 0 0 20vw 6vw #000000; }
  
-  /* ================= EYE ================= */
+  /* ================= HYPER-REALISTIC EYE ================= */
   #eyeWrap{
     position:relative;
-    width: min(78vw, 900px);
+    width: min(70vw, 800px);
     z-index: 10;
-    filter:
-      drop-shadow(1.5px 0 0 var(--fringe-red))
-      drop-shadow(-1.5px 0 0 var(--fringe-cyan));
-    animation: eyeDrift 7s ease-in-out infinite;
+    filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
+    animation: eyeDrift 8s ease-in-out infinite;
   }
-  @keyframes eyeDrift{
-    0%,100%{ transform: translateY(0) scale(1); }
-    50%{ transform: translateY(-4px) scale(1.006); }
-  }
+  @keyframes eyeDrift{ 0%,100%{ transform: translateY(0) scale(1); } 50%{ transform: translateY(-3px) scale(1.005); } }
  
-  #eyeSvg{ width:100%; height:auto; display:block; overflow:visible; }
+  #eyeCanvas { width:100%; height:auto; display:block; }
  
-  #eyeSvg #lidTop rect, #eyeSvg #lidBottom rect{
-    transition: transform 100ms cubic-bezier(.7,0,.84,0);
-    transform-box: fill-box;
-    transform-origin: center;
-  }
-  #eyeSvg #lidTop rect{ transform: translateY(-101%); }
-  #eyeSvg #lidBottom rect{ transform: translateY(101%); }
-  #eyeSvg.blink #lidTop rect,
-  #eyeSvg.blink #lidBottom rect{
-    transform: translateY(0%);
-    transition: transform 90ms cubic-bezier(.7,0,.84,0);
-  }
-  #eyeSvg.opening #lidTop rect,
-  #eyeSvg.opening #lidBottom rect{
-    transition: transform 160ms cubic-bezier(.16,1,.3,1);
-  }
- 
-  #irisGroup{ transition: transform 60ms linear; }
- 
-  /* ================= SUBTITLE / HEADER ================= */
+  /* ================= SUBTITLE ================= */
   #subtitleBar{
-    position: fixed; left: 50%; bottom: 6.5%; transform: translateX(-50%);
+    position: fixed; left: 50%; bottom: 8%; transform: translateX(-50%);
     width: min(90vw, 720px); text-align:center;
     color: var(--accent); font-size: clamp(14px, 2.1vw, 19px);
     letter-spacing: 0.5px; line-height:1.5;
@@ -115,286 +137,158 @@
   #subtitleBar span.cursor{ display:inline-block; width:8px; margin-left:2px; background: var(--accent); animation: blinkCursor 0.9s steps(1) infinite; }
   @keyframes blinkCursor{ 50%{ opacity:0; } }
  
-  #designation{
-    position: fixed; top: 4%; left:50%; transform: translateX(-50%);
-    color: var(--text-dim); font-size: 12px; letter-spacing: 3px; z-index:30; text-align:center;
-  }
-  #designation b{ color:#c8d3e0; font-weight:normal; }
- 
   /* ================= WEBCAM PANEL ================= */
   #camPanel{
-    position: fixed; bottom: 22px; left: 22px; width: 210px; z-index: 50;
-    border: 2px solid #171b28; background: #000;
-    box-shadow: 0 0 0 4px #05060a, 0 6px 24px rgba(0,0,0,0.7);
-    filter: grayscale(0.25) contrast(1.15) brightness(0.95) sepia(0.06);
+    position: fixed; bottom: 22px; left: 22px; width: 200px; z-index: 50;
+    border: 1px solid #1a2030; background: #000;
+    box-shadow: 0 0 0 2px #05060a, 0 10px 30px rgba(0,0,0,0.8);
   }
   #camHeader{
     display:flex; align-items:center; justify-content:space-between; padding: 4px 8px;
-    background: #0a0d16; color: #b9c3da; font-size: 10px; letter-spacing: 1.5px;
+    background: #0a0d16; color: #b9c3da; font-size: 9px; letter-spacing: 1px;
   }
-  #camHeader .dot{
-    width:7px; height:7px; border-radius:50%; background:#ff2d3f;
-    box-shadow: 0 0 6px 2px rgba(255,45,63,0.8); animation: recBlink 1.1s steps(1) infinite;
-  }
-  @keyframes recBlink{ 50%{ opacity:0.15; } }
+  #camHeader .dot{ width:6px; height:6px; border-radius:50%; background:#ff2d3f; box-shadow: 0 0 5px #ff2d3f; animation: recBlink 1.1s steps(1) infinite; }
+  @keyframes recBlink{ 50%{ opacity:0.2; } }
   #camVideoWrap{ position:relative; width:100%; aspect-ratio: 4/3; overflow:hidden; background:#000; }
-  #camVideo{ width:100%; height:100%; object-fit:cover; transform: scaleX(-1); opacity:0.9; }
-  #camScan{
-    position:absolute; inset:0;
-    background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.06) 0px, transparent 2px, transparent 4px);
-    mix-blend-mode: overlay; pointer-events:none;
-  }
-  #camNoise{ position:absolute; inset:0; pointer-events:none; }
-  #camFooter{
-    padding:3px 8px; font-size:9px; color:#5b6478; letter-spacing:1px;
-    display:flex; justify-content:space-between; background:#0a0d16;
-  }
+  #camVideo{ width:100%; height:100%; object-fit:cover; transform: scaleX(-1); opacity:0.8; filter: contrast(1.2) brightness(0.9); }
+  #camScan{ position:absolute; inset:0; background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.05) 0px, transparent 2px, transparent 4px); mix-blend-mode: overlay; pointer-events:none; }
   #camOffline{
     position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center;
-    gap:8px; text-align:center; color:#c9d4ff; font-size:10.5px; padding:12px; background:#000; line-height:1.5;
+    gap:8px; text-align:center; color:#c9d4ff; font-size:10px; padding:10px; background:#000;
   }
-  #camRetry{
-    background:transparent; border:1px solid #3a4356; color:#c9d4ff;
-    font-family:inherit; font-size:9.5px; letter-spacing:1.5px; padding:5px 10px; cursor:pointer;
-  }
-  #camRetry:hover{ border-color:#c9d4ff; }
+  #camRetry{ background:transparent; border:1px solid #3a4356; color:#c9d4ff; font-family:inherit; font-size:9px; padding:4px 8px; cursor:pointer; }
  
   /* ================= CHAT PANEL ================= */
   #chatPanel{
-    position: fixed; bottom: 22px; right: 22px; width: 280px; z-index: 50;
-    border: 2px solid #171b28; background: #07090f;
-    box-shadow: 0 0 0 4px #05060a, 0 6px 24px rgba(0,0,0,0.7);
+    position: fixed; bottom: 22px; right: 22px; width: 300px; z-index: 50;
+    border: 1px solid #1a2030; background: #07090f;
+    box-shadow: 0 0 0 2px #05060a, 0 10px 30px rgba(0,0,0,0.8);
     display:flex; flex-direction:column;
-    font-family: 'Courier New', Courier, monospace;
   }
   #chatHeader{
     display:flex; align-items:center; justify-content:space-between; padding: 6px 10px;
-    background: #0a0d16; color: #b9c3da; font-size: 10px; letter-spacing: 1.5px;
-    border-bottom: 1px solid #171b28;
-  }
-  #chatHeader .dot2{
-    width:6px; height:6px; border-radius:50%; background:#7fe0ff;
-    box-shadow: 0 0 6px 2px rgba(127,224,255,0.6);
+    background: #0a0d16; color: #b9c3da; font-size: 10px; letter-spacing: 1px;
+    border-bottom: 1px solid #1a2030;
   }
   #chatLog{
-    height: 180px; overflow-y:auto; padding: 8px 10px; display:flex; flex-direction:column; gap:8px;
+    height: 200px; overflow-y:auto; padding: 10px; display:flex; flex-direction:column; gap:8px;
     scrollbar-width: thin; scrollbar-color: #2a3145 #0a0d16;
   }
-  #chatLog::-webkit-scrollbar{ width:5px; }
-  #chatLog::-webkit-scrollbar-thumb{ background:#2a3145; }
-  .msg{ font-size: 11.5px; line-height:1.5; max-width: 92%; padding: 6px 9px; border-radius:2px; word-wrap:break-word; }
-  .msg.user{
-    align-self:flex-end; background:#141a2c; color:#c9d4ff; border:1px solid #232b40;
-  }
-  .msg.doctor{
-    align-self:flex-start; background:#12100c; color:#cdc6b8; border:1px solid #2a2015;
-    text-shadow: 0 0 5px rgba(207,216,238,0.15);
-  }
-  .msg.doctor.thinking{ color:#7c86a0; font-style:italic; }
-  .msg.doctor.alert{ color:var(--alert); border-color:var(--alert); }
-  .msg .tag{ display:block; font-size:8.5px; letter-spacing:1.5px; opacity:0.55; margin-bottom:3px; }
-  #chatInputRow{
-    display:flex; border-top: 1px solid #171b28;
-  }
-  #chatInput{
-    flex:1; background:#0a0d16; border:none; outline:none; color:#c9d4ff;
-    font-family: inherit; font-size: 12px; padding: 9px 10px;
-  }
-  #chatInput::placeholder{ color:#4a5268; }
-  #chatSend{
-    background:#0a0d16; border:none; border-left:1px solid #171b28; color:#7c86a0;
-    font-family: inherit; font-size: 11px; letter-spacing:1px; padding: 0 14px; cursor:pointer;
-  }
+  .msg{ font-size: 11px; line-height:1.4; max-width: 92%; padding: 6px 8px; border-radius:2px; word-wrap:break-word; }
+  .msg.user{ align-self:flex-end; background:#141a2c; color:#c9d4ff; border:1px solid #232b40; }
+  .msg.doctor{ align-self:flex-start; background:#12100c; color:#cdc6b8; border:1px solid #2a2015; }
+  .msg.doctor.alert{ color:var(--alert); border-color:var(--alert); background: #1a0505; }
+  .msg .tag{ display:block; font-size:8px; letter-spacing:1px; opacity:0.6; margin-bottom:2px; }
+  #chatInputRow{ display:flex; border-top: 1px solid #1a2030; }
+  #chatInput{ flex:1; background:#0a0d16; border:none; outline:none; color:#c9d4ff; font-family: inherit; font-size: 11px; padding: 8px; }
+  #chatSend{ background:#0a0d16; border:none; border-left:1px solid #1a2030; color:#7c86a0; font-family: inherit; font-size: 10px; padding: 0 12px; cursor:pointer; }
   #chatSend:hover{ color:#c9d4ff; }
  
-  #connectRow{
-    display:flex; align-items:center; justify-content:space-between; gap:6px;
-    padding: 6px 10px; border-top: 1px solid #171b28; background:#090b12;
-  }
-  #connectStatus{ font-size:9px; color:#5b6478; letter-spacing:0.5px; }
-  #connectBtn{
-    background:transparent; border:1px solid #2a3145; color:#7fe0ff;
-    font-family:inherit; font-size:9.5px; letter-spacing:1px; padding:5px 9px; cursor:pointer; white-space:nowrap;
-  }
+  #connectRow{ display:flex; align-items:center; justify-content:space-between; gap:6px; padding: 6px 10px; border-top: 1px solid #1a2030; background:#090b12; }
+  #connectStatus{ font-size:8px; color:#5b6478; }
+  #connectBtn{ background:transparent; border:1px solid #2a3145; color:#7fe0ff; font-family:inherit; font-size:8px; padding:3px 6px; cursor:pointer; }
   #connectBtn:hover{ border-color:#7fe0ff; }
-  #openStandaloneBtn{
-    background:transparent; border:1px solid #2a3145; color:#8993a8;
-    font-family:inherit; font-size:9.5px; letter-spacing:1px; padding:5px 9px; cursor:pointer; white-space:nowrap;
-    margin-right:6px;
+  #webSearchToggle {
+    background:transparent; border:1px solid #2a3145; color:#5b6478; font-family:inherit; font-size:8px; padding:3px 6px; cursor:pointer; margin-right:5px;
   }
-  #openStandaloneBtn:hover{ border-color:#8993a8; color:#c9d4ff; }
-  #embedWarning{
-    display:none; background:#1d1808; border-top:1px solid #4a3b0f; color:#e6c26a;
-    font-size:10px; line-height:1.5; padding:9px 10px;
-  }
- 
-  /* ================= DATA / FILE PANEL ================= */
-  #dataPanel{
-    position: fixed; top: 22px; left: 22px; width: 250px; z-index: 50;
-    border: 2px solid #171b28; background: #07090f;
-    box-shadow: 0 0 0 4px #05060a, 0 6px 24px rgba(0,0,0,0.7);
-    font-family: 'Courier New', Courier, monospace;
-  }
-  #dataHeader{
-    display:flex; align-items:center; justify-content:space-between; padding: 6px 10px;
-    background: #0a0d16; color: #b9c3da; font-size: 10px; letter-spacing: 1.5px;
-    border-bottom: 1px solid #171b28;
-  }
-  #dataHeader .dot3{
-    width:6px; height:6px; border-radius:50%; background:#d3a23a;
-    box-shadow: 0 0 6px 2px rgba(211,162,58,0.55);
-  }
-  #dataBody{ padding: 9px 10px; display:flex; flex-direction:column; gap:5px; }
-  .dataRow{ display:flex; justify-content:space-between; gap:8px; font-size:10.5px; color:#8993a8; }
-  .dataRow b{ color:#c9d4ff; font-weight:normal; text-align:right; }
-  .dataRow b.traced{ color:var(--alert); text-shadow: 0 0 5px var(--alert); }
-  #scanBtn{
-    margin-top:4px; align-self:flex-start;
-    background:transparent; border:1px solid #2a3145; color:#7c86a0;
-    font-family:inherit; font-size:9.5px; letter-spacing:1.5px; padding:5px 10px; cursor:pointer;
-  }
-  #scanBtn:hover{ border-color:#c9d4ff; color:#c9d4ff; }
-  #dataNote{
-    font-size:9px; color:#454d63; line-height:1.5; padding-top:4px;
-    border-top: 1px dashed #1c2233; margin-top:2px;
-  }
- 
+  #webSearchToggle.active { border-color: #4caf50; color: #4caf50; }
+
   #muteBtn{
     position:fixed; top:20px; right:20px; z-index:60;
     background:transparent; border:1px solid #2a3145; color:#7c86a0;
-    font-family:inherit; font-size:11px; letter-spacing:2px; padding:8px 14px; cursor:pointer;
+    font-family:inherit; font-size:10px; padding:6px 10px; cursor:pointer;
   }
-  #muteBtn:hover{ border-color:#cfd8ee; color:#cfd8ee; }
- 
-  @media (prefers-reduced-motion: reduce){ #eyeWrap, #stage{ animation: none !important; } }
- 
-  @media (max-width: 560px){ #camPanel{ width:150px; left:10px; bottom:10px; } #designation{ font-size:10px; } }
+  
+  /* Overlay removed for immediate start */
+  #startOverlay { display: none; }
+
+  @media (max-width: 600px){ 
+    #sidebar { width: 100%; }
+    #camPanel{ width:140px; left:10px; bottom:10px; } 
+    #chatPanel{ width: 260px; right: 10px; bottom: 10px; }
+  }
 </style>
 </head>
 <body>
- 
-<button id="muteBtn">🔇 SILENCE DOCTOR</button>
-<a href="https://developer.puter.com" target="_blank" rel="noopener"
-   style="position:fixed;bottom:6px;right:12px;z-index:60;font-size:9px;letter-spacing:1px;color:#3a4356;text-decoration:none;font-family:'Courier New',monospace;">
-  Powered by Puter
-</a>
- 
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <div id="sidebarHeader">
+    <span id="sidebarTitle">SUBJECT DATA</span>
+    <button id="closeSidebar">✕</button>
+  </div>
+  <div id="sidebarContent">
+    <div class="sb-section">
+      <div class="sb-title">IDENTIFICATION</div>
+      <div class="sb-item">NAME: <b id="sbName">UNKNOWN</b></div>
+      <div class="sb-item">PHONE: <b id="sbPhone">NONE</b></div>
+      <div class="sb-item">LOCATION: <b id="sbLocation">TRACKING...</b></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">OBSERVATIONS</div>
+      <div class="sb-item">GARMENT: <b id="sbGarment">NO DATA</b></div>
+      <div class="sb-item">MOOD: <b id="sbMood">CALCULATING</b></div>
+      <div class="sb-item">SESSIONS: <b id="sbSessions">1</b></div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">MEMORY LOG</div>
+      <div class="sb-log" id="sbLog">
+        <!-- Dynamic logs go here -->
+      </div>
+    </div>
+    <div class="sb-section">
+      <div class="sb-title">SYSTEM STATUS</div>
+      <div class="sb-item">AI CORE: <b style="color:#4caf50">ONLINE</b></div>
+      <div class="sb-item">WEB SEARCH: <b id="sbWebStatus">STANDBY</b></div>
+      <div class="sb-item">LEARNING: <b style="color:#ff9800">ACTIVE</b></div>
+    </div>
+  </div>
+</div>
+
+<button id="toggleSidebarBtn">☰ DATA LOG</button>
+<button id="muteBtn">🔇 AUDIO</button>
+
 <canvas id="starCanvas"></canvas>
 <canvas id="staticCanvas"></canvas>
 <div id="vignette"></div>
- 
-<div id="dataPanel">
-  <div id="dataHeader"><span>PATIENT FILE</span><span class="dot3"></span></div>
-  <div id="dataBody">
-    <div class="dataRow"><span>DESIGNATION</span><b id="dataDesignation">PENDING...</b></div>
-    <div class="dataRow"><span>NAME (self-reported)</span><b id="dataName">NOT GIVEN</b></div>
-    <div class="dataRow"><span>PHONE (self-reported)</span><b id="dataPhone">NOT GIVEN</b></div>
-    <div class="dataRow"><span>GARMENT COLOR</span><b id="dataGarment">NO SIGNAL</b></div>
-    <div class="dataRow"><span>LOCAL TIME</span><b id="dataTime">--:--:--</b></div>
-    <div class="dataRow"><span>TIMEZONE</span><b id="dataTZ">UNKNOWN</b></div>
-    <div class="dataRow"><span>PLATFORM</span><b id="dataPlatform">UNKNOWN</b></div>
-    <div class="dataRow"><span>APPROX. REGION</span><b id="dataRegion">LOOKING UP...</b></div>
-    <button id="scanBtn">🔍 RE-SCAN GARMENT</button>
-    <div id="dataNote">// File persists across sessions. Do not attempt to erase history.</div>
-  </div>
-</div>
- 
-<div id="designation">SUBJECT UNDER OBSERVATION &nbsp;·&nbsp; UNIT: <b>07 &ldquo;THE DOCTOR&rdquo;</b> &nbsp;·&nbsp; STATUS: <b id="statusWord">AWAKE</b></div>
- 
+
 <div id="stage">
   <div id="eyeWrap">
-    <svg id="eyeSvg" viewBox="0 0 600 320" preserveAspectRatio="xMidYMid meet">
-      <defs>
-        <clipPath id="eyeClip">
-          <path d="M18,162 C120,55 250,26 300,26 C350,26 480,55 582,162 C480,269 350,298 300,298 C250,298 120,269 18,162 Z"/>
-        </clipPath>
-        <radialGradient id="scleraGrad" cx="42%" cy="38%" r="75%">
-          <stop offset="0%" stop-color="#dcd6c8"/>
-          <stop offset="45%" stop-color="var(--sclera-a)"/>
-          <stop offset="100%" stop-color="var(--sclera-b)"/>
-        </radialGradient>
-        <radialGradient id="irisGrad" cx="42%" cy="38%" r="65%">
-          <stop offset="0%" stop-color="#6b543a"/>
-          <stop offset="55%" stop-color="var(--iris-mid)"/>
-          <stop offset="100%" stop-color="var(--iris-dark)"/>
-        </radialGradient>
-        <filter id="grain" x="-20%" y="-20%" width="140%" height="140%">
-          <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" stitchTiles="stitch" result="n"/>
-          <feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.09 0"/>
-        </filter>
-        <filter id="softBlur" x="-30%" y="-30%" width="160%" height="160%">
-          <feGaussianBlur stdDeviation="6"/>
-        </filter>
-      </defs>
- 
-      <g clip-path="url(#eyeClip)">
-        <rect x="0" y="0" width="600" height="320" fill="url(#scleraGrad)"/>
-        <g stroke="#7a2a2a" fill="none" opacity="0.32" stroke-linecap="round">
-          <path d="M30,150 q90,-16 170,2" stroke-width="1.4"/>
-          <path d="M25,175 q100,26 190,10" stroke-width="1.1"/>
-          <path d="M560,140 q-80,-14 -150,4" stroke-width="1.3"/>
-          <path d="M575,180 q-90,20 -170,4" stroke-width="1"/>
-        </g>
-        <path d="M18,162 C120,55 250,26 300,26 C350,26 480,55 582,162 C480,269 350,298 300,298 C250,298 120,269 18,162 Z"
-              fill="none" stroke="#000000" stroke-width="34" opacity="0.30" filter="url(#softBlur)"/>
-        <rect x="0" y="0" width="600" height="320" filter="url(#grain)" opacity="0.6"/>
-        <g id="irisGroup" transform="translate(300,168)">
-          <circle r="82" fill="url(#irisGrad)"/>
-          <circle r="82" fill="none" stroke="#100b06" stroke-width="3" opacity="0.7"/>
-          <circle r="36" fill="var(--pupil)"/>
-          <circle cx="-15" cy="-22" r="12" fill="#ffffff" opacity="0.92"/>
-          <circle cx="18" cy="20" r="5" fill="#ffffff" opacity="0.45"/>
-        </g>
-      </g>
- 
-      <g id="lidTop" clip-path="url(#eyeClip)">
-        <rect x="0" y="0" width="600" height="320" fill="#05070f"/>
-      </g>
-      <g id="lidBottom" clip-path="url(#eyeClip)">
-        <rect x="0" y="0" width="600" height="320" fill="#05070f"/>
-      </g>
- 
-      <path d="M18,162 C120,55 250,26 300,26 C350,26 480,55 582,162 C480,269 350,298 300,298 C250,298 120,269 18,162 Z"
-            fill="none" stroke="#04060c" stroke-width="5"/>
-    </svg>
+    <!-- Realistic Canvas Eye -->
+    <canvas id="eyeCanvas" width="800" height="450"></canvas>
   </div>
 </div>
- 
+
 <div id="subtitleBar"></div>
- 
+
 <div id="camPanel">
-  <div id="camHeader"><span>CAM_01 · OBS</span><span class="dot"></span></div>
+  <div id="camHeader"><span>CAM_01</span><span class="dot"></span></div>
   <div id="camVideoWrap">
     <video id="camVideo" autoplay muted playsinline></video>
-    <canvas id="camNoise"></canvas>
     <div id="camScan"></div>
     <div id="camOffline">
-      <span id="camOfflineMsg">NO SIGNAL</span>
+      <span>NO SIGNAL</span>
       <button id="camRetry">↻ RETRY</button>
     </div>
   </div>
-  <div id="camFooter"><span id="camClock">00:00:00</span><span>LIVE</span></div>
 </div>
- 
+
 <div id="chatPanel">
-  <div id="chatHeader"><span>SPEAK TO UNIT-07</span><span class="dot2"></span></div>
+  <div id="chatHeader"><span>COMM LINK</span><span style="font-size:8px; opacity:0.5">UNIT-07</span></div>
   <div id="chatLog"></div>
   <div id="chatInputRow">
-    <input id="chatInput" type="text" maxlength="140" placeholder="Ask the Doctor something..." autocomplete="off">
+    <input id="chatInput" type="text" placeholder="Speak..." autocomplete="off">
     <button id="chatSend">SEND</button>
   </div>
   <div id="connectRow">
-    <span id="connectStatus">checking connection...</span>
-    <span id="connectBtns">
-      <button id="openStandaloneBtn" title="Open this exact page as its own tab">🗗 OPEN STANDALONE</button>
-      <button id="connectBtn">🔌 CONNECT AI</button>
-    </span>
-  </div>
-  <div id="embedWarning" style="display:none;">
-    ⚠ Running inside an embedded preview. Sign-in popups are frequently blocked here — click "OPEN STANDALONE" above to run this in its own real tab.
+    <span id="connectStatus">AI: STANDBY</span>
+    <div>
+      <button id="webSearchToggle" title="Enable Web Search">🌐 WEB</button>
+      <button id="connectBtn">🔌 CONNECT</button>
+    </div>
   </div>
 </div>
- 
+
 <script>
 (function(){
   "use strict";
@@ -402,985 +296,393 @@
   const rand = (a,b) => a + Math.random()*(b-a);
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
   let muted = false;
- 
-  /* ================= STARFIELD ================= */
-  const starCanvas = $('starCanvas');
-  const stctx = starCanvas.getContext('2d');
+  let webSearchEnabled = false;
+  
+  // Persistent Memory System
+  const memory = {
+    name: localStorage.getItem('u7_name') || null,
+    phone: localStorage.getItem('u7_phone') || null,
+    garment: localStorage.getItem('u7_garment') || 'UNKNOWN',
+    sessions: parseInt(localStorage.getItem('u7_sessions') || '0') + 1,
+    logs: JSON.parse(localStorage.getItem('u7_logs') || '[]'),
+    save: function() {
+      localStorage.setItem('u7_name', this.name);
+      localStorage.setItem('u7_phone', this.phone);
+      localStorage.setItem('u7_garment', this.garment);
+      localStorage.setItem('u7_sessions', this.sessions);
+      localStorage.setItem('u7_logs', JSON.stringify(this.logs));
+      updateSidebar();
+    },
+    addLog: function(text) {
+      const time = new Date().toLocaleTimeString();
+      this.logs.unshift(`[${time}] ${text}`);
+      if(this.logs.length > 20) this.logs.pop();
+      this.save();
+    }
+  };
+
+  // Initialize Sidebar
+  function updateSidebar() {
+    $('sbName').textContent = memory.name || 'UNKNOWN';
+    $('sbPhone').textContent = memory.phone || 'NONE';
+    $('sbGarment').textContent = memory.garment;
+    $('sbSessions').textContent = memory.sessions;
+    const logEl = $('sbLog');
+    logEl.innerHTML = memory.logs.map(l => `<div>${l}</div>`).join('');
+  }
+  updateSidebar();
+
+  // Sidebar Toggle
+  $('toggleSidebarBtn').addEventListener('click', () => $('sidebar').classList.add('open'));
+  $('closeSidebar').addEventListener('click', () => $('sidebar').classList.remove('open'));
+  $('webSearchToggle').addEventListener('click', (e) => {
+    webSearchEnabled = !webSearchEnabled;
+    e.target.classList.toggle('active');
+    $('sbWebStatus').textContent = webSearchEnabled ? 'ACTIVE' : 'STANDBY';
+    $('sbWebStatus').style.color = webSearchEnabled ? '#4caf50' : '#5b6478';
+    addMessage('doctor', webSearchEnabled ? "Web protocols engaged. I can see the outside world now." : "Web protocols severed. Blind once more.");
+  });
+
+  /* ================= STARFIELD & GRAIN ================= */
+  const starCanvas = $('starCanvas'), stctx = starCanvas.getContext('2d');
   function drawStars(){
-    starCanvas.width = window.innerWidth;
-    starCanvas.height = window.innerHeight;
+    starCanvas.width = window.innerWidth; starCanvas.height = window.innerHeight;
     stctx.clearRect(0,0,starCanvas.width,starCanvas.height);
-    const count = Math.floor((starCanvas.width*starCanvas.height)/1800);
-    for(let i=0;i<count;i++){
-      const x = Math.random()*starCanvas.width;
-      const y = Math.random()*starCanvas.height;
-      const r = Math.random()*1.1 + 0.15;
-      const a = Math.random()*0.55 + 0.08;
-      stctx.beginPath();
-      stctx.fillStyle = `rgba(201,212,255,${a})`;
-      stctx.arc(x,y,r,0,Math.PI*2);
-      stctx.fill();
+    for(let i=0;i<200;i++){
+      const x=Math.random()*starCanvas.width, y=Math.random()*starCanvas.height;
+      stctx.fillStyle = `rgba(200,210,255,${Math.random()*0.5})`;
+      stctx.beginPath(); stctx.arc(x,y,Math.random()*1.5,0,Math.PI*2); stctx.fill();
     }
   }
-  drawStars();
-  window.addEventListener('resize', drawStars);
- 
-  /* ================= FILM GRAIN ================= */
-  const staticCanvas = $('staticCanvas');
-  const sctx = staticCanvas.getContext('2d');
-  function sizeStatic(){ staticCanvas.width = window.innerWidth; staticCanvas.height = window.innerHeight; }
-  sizeStatic();
-  window.addEventListener('resize', sizeStatic);
+  drawStars(); window.addEventListener('resize', drawStars);
+
+  const staticCanvas = $('staticCanvas'), sctx = staticCanvas.getContext('2d');
   function drawStatic(){
-    const w = staticCanvas.width, h = staticCanvas.height;
-    const imgData = sctx.createImageData(w, h);
-    const buf = imgData.data;
-    for(let i=0; i<buf.length; i+=4){
-      const v = Math.random()*255;
-      buf[i]=v; buf[i+1]=v; buf[i+2]=v;
-      buf[i+3]= Math.random() * 16;
-    }
+    staticCanvas.width = window.innerWidth; staticCanvas.height = window.innerHeight;
+    const imgData = sctx.createImageData(staticCanvas.width, staticCanvas.height);
+    const d = imgData.data;
+    for(let i=0; i<d.length; i+=4){ const v=Math.random()*255; d[i]=v; d[i+1]=v; d[i+2]=v; d[i+3]=15; }
     sctx.putImageData(imgData, 0, 0);
     requestAnimationFrame(drawStatic);
   }
   drawStatic();
- 
-  const camNoise = $('camNoise');
-  const cctx = camNoise.getContext('2d');
-  function drawCamNoise(){
-    camNoise.width = camNoise.parentElement.clientWidth;
-    camNoise.height = camNoise.parentElement.clientHeight;
-    const w = camNoise.width, h = camNoise.height;
-    if(w && h){
-      const imgData = cctx.createImageData(w,h);
-      const buf = imgData.data;
-      for(let i=0;i<buf.length;i+=4){
-        const v = Math.random()*255;
-        buf[i]=v; buf[i+1]=v; buf[i+2]=v; buf[i+3]= Math.random() * 20;
-      }
-      cctx.putImageData(imgData,0,0);
+
+  /* ================= HYPER-REALISTIC EYE (CANVAS) ================= */
+  const eyeCanvas = $('eyeCanvas'), ectx = eyeCanvas.getContext('2d');
+  let eyeX = 0, eyeY = 0, targetX = 0, targetY = 0;
+  let blinkState = 0; // 0=open, 1=closing, 2=closed, 3=opening
+  let blinkTimer = 0;
+
+  function drawEye() {
+    const w = eyeCanvas.width, h = eyeCanvas.height;
+    const cx = w/2, cy = h/2;
+    
+    // Smooth movement
+    eyeX += (targetX - eyeX) * 0.1;
+    eyeY += (targetY - eyeY) * 0.1;
+
+    ectx.clearRect(0,0,w,h);
+
+    // Sclera (White) - Gradients for realism
+    const scleraGrad = ectx.createRadialGradient(cx, cy, 50, cx, cy, 300);
+    scleraGrad.addColorStop(0, '#fdfdfd');
+    scleraGrad.addColorStop(0.8, '#e0e0e0');
+    scleraGrad.addColorStop(1, '#a0a0a0');
+    
+    // Eye Shape Mask
+    ectx.save();
+    ectx.beginPath();
+    ectx.ellipse(cx, cy, 280, 140, 0, 0, Math.PI*2);
+    ectx.clip();
+
+    // Draw Sclera
+    ectx.fillStyle = scleraGrad;
+    ectx.fillRect(0,0,w,h);
+
+    // Veins (Subtle)
+    ectx.strokeStyle = 'rgba(200, 50, 50, 0.15)';
+    ectx.lineWidth = 1;
+    ectx.beginPath();
+    ectx.moveTo(cx-200, cy); ectx.quadraticCurveTo(cx-100, cy-20, cx, cy);
+    ectx.stroke();
+    ectx.beginPath();
+    ectx.moveTo(cx+200, cy); ectx.quadraticCurveTo(cx+100, cy+30, cx, cy);
+    ectx.stroke();
+
+    // Iris & Pupil
+    const irisX = cx + eyeX;
+    const irisY = cy + eyeY;
+    
+    // Iris Gradient
+    const irisGrad = ectx.createRadialGradient(irisX, irisY, 10, irisX, irisY, 90);
+    irisGrad.addColorStop(0, '#1a1208'); // Dark center
+    irisGrad.addColorStop(0.4, '#5c4a35'); // Mid brown
+    irisGrad.addColorStop(0.7, '#8f7b60'); // Light ring
+    irisGrad.addColorStop(1, '#2a1f15'); // Outer ring
+
+    ectx.fillStyle = irisGrad;
+    ectx.beginPath();
+    ectx.arc(irisX, irisY, 90, 0, Math.PI*2);
+    ectx.fill();
+
+    // Pupil
+    ectx.fillStyle = '#000';
+    ectx.beginPath();
+    ectx.arc(irisX, irisY, 35, 0, Math.PI*2);
+    ectx.fill();
+
+    // Specular Highlight (Wet look)
+    ectx.fillStyle = 'rgba(255,255,255,0.8)';
+    ectx.beginPath();
+    ectx.ellipse(irisX - 25, irisY - 25, 12, 8, Math.PI/4, 0, Math.PI*2);
+    ectx.fill();
+    ectx.fillStyle = 'rgba(255,255,255,0.4)';
+    ectx.beginPath();
+    ectx.arc(irisX + 30, irisY + 30, 6, 0, Math.PI*2);
+    ectx.fill();
+
+    // Eyelids (Blink Logic)
+    let lidOffset = 0;
+    if(blinkState === 1) { blinkTimer += 0.2; lidOffset = Math.sin(blinkTimer * Math.PI) * 140; }
+    else if(blinkState === 2) { lidOffset = 140; }
+    else if(blinkState === 3) { blinkTimer -= 0.15; if(blinkTimer <= 0) { blinkTimer=0; blinkState=0; } lidOffset = Math.sin((1.5-blinkTimer) * Math.PI) * 140; }
+
+    if(lidOffset > 0) {
+      ectx.restore(); // Remove clip to draw lids over
+      ectx.fillStyle = '#050505';
+      // Top Lid
+      ectx.beginPath();
+      ectx.moveTo(0,0);
+      ectx.lineTo(w,0);
+      ectx.lineTo(w, cy + lidOffset - 10);
+      ectx.quadraticCurveTo(cx, cy + lidOffset + 20, 0, cy + lidOffset - 10);
+      ectx.fill();
+      // Bottom Lid
+      ectx.beginPath();
+      ectx.moveTo(0,h);
+      ectx.lineTo(w,h);
+      ectx.lineTo(w, cy - lidOffset + 10);
+      ectx.quadraticCurveTo(cx, cy - lidOffset - 20, 0, cy - lidOffset + 10);
+      ectx.fill();
+    } else {
+      ectx.restore();
     }
-    requestAnimationFrame(drawCamNoise);
+
+    requestAnimationFrame(drawEye);
   }
-  drawCamNoise();
- 
-  /* ================= GLITCH BARS ================= */
-  const barPool = [];
-  for(let i=0;i<3;i++){
-    const bar = document.createElement('div');
-    bar.className = 'glitchBar';
-    document.body.appendChild(bar);
-    barPool.push(bar);
-  }
-  function fireGlitchBars(){
-    barPool.forEach(bar => {
-      bar.style.top = rand(0,100) + 'vh';
-      bar.style.height = rand(1,3) + 'px';
-      bar.style.opacity = rand(0.15, 0.5);
-      bar.style.transform = `translateX(${rand(-20,20)}px)`;
-    });
-    setTimeout(() => { barPool.forEach(bar => bar.style.opacity = 0); }, rand(60,160));
-  }
- 
-  /* ================= EYE TRACKING ================= */
-  const eyeSvg = $('eyeSvg');
-  const irisGroup = $('irisGroup');
-  let targetX = 0, targetY = 0, curX = 0, curY = 0;
-  const MAX_MOVE = 34;
- 
-  function updateIrisTarget(clientX, clientY){
-    const rect = eyeSvg.getBoundingClientRect();
+  drawEye();
+
+  // Eye Tracking
+  window.addEventListener('mousemove', (e) => {
+    const rect = eyeCanvas.getBoundingClientRect();
     const cx = rect.left + rect.width/2;
     const cy = rect.top + rect.height/2;
-    let dx = clientX - cx;
-    let dy = clientY - cy;
-    const dist = Math.hypot(dx,dy) || 1;
-    const norm = Math.min(1, dist / 600);
-    dx = (dx/dist) * norm;
-    dy = (dy/dist) * norm;
-    targetX = dx * MAX_MOVE;
-    targetY = dy * MAX_MOVE * 0.6;
-  }
-  window.addEventListener('mousemove', (e) => updateIrisTarget(e.clientX, e.clientY));
-  window.addEventListener('touchmove', (e) => {
-    if(e.touches && e.touches[0]) updateIrisTarget(e.touches[0].clientX, e.touches[0].clientY);
-  }, {passive:true});
- 
-  function irisLoop(){
-    curX += (targetX - curX) * 0.12;
-    curY += (targetY - curY) * 0.12;
-    irisGroup.setAttribute('transform', `translate(${300+curX},${168+curY})`);
-    requestAnimationFrame(irisLoop);
-  }
-  irisLoop();
- 
-  function blinkOnce(){
-    eyeSvg.classList.remove('opening');
-    eyeSvg.classList.add('blink');
-    setTimeout(() => { eyeSvg.classList.remove('blink'); eyeSvg.classList.add('opening'); }, 110);
-  }
-  function scheduleBlink(){
+    const dx = (e.clientX - cx) / rect.width;
+    const dy = (e.clientY - cy) / rect.height;
+    targetX = clamp(dx * 100, -80, 80);
+    targetY = clamp(dy * 60, -50, 50);
+  });
+
+  // Blinking
+  function scheduleBlink() {
     setTimeout(() => {
-      blinkOnce();
-      if(Math.random() < 0.22){ setTimeout(blinkOnce, 260); }
+      if(blinkState === 0) { blinkState = 1; blinkTimer = 0; setTimeout(()=>{blinkState=2; setTimeout(()=>{blinkState=3;}, 100);}, 100); }
       scheduleBlink();
-    }, rand(1800, 6200));
+    }, rand(2000, 6000));
   }
   scheduleBlink();
- 
-  /* ================= VISUAL GLITCHES ================= */
-  const stage = $('stage');
-  const statusWord = $('statusWord');
-  const statuses = ['AWAKE','OBSERVING','LISTENING','CURIOUS','WAITING','PLEASED'];
-  function scheduleGlitch(){
-    setTimeout(() => {
-      stage.classList.add('glitching');
-      fireGlitchBars();
-      playGlitchBurst(0.5);
-      setTimeout(() => stage.classList.remove('glitching'), 200);
-      statusWord.textContent = statuses[Math.floor(Math.random()*statuses.length)];
-      scheduleGlitch();
-    }, rand(4000, 11000));
-  }
- 
-  /* ================= WEBCAM ================= */
-  const camVideo = $('camVideo');
-  const camOffline = $('camOffline');
-  const camOfflineMsg = $('camOfflineMsg');
-  const camRetry = $('camRetry');
-  const camClock = $('camClock');
-  let clockStarted = false;
- 
-  function startClock(){
-    if(clockStarted) return;
-    clockStarted = true;
-    let seconds = 0;
-    setInterval(() => {
-      seconds++;
-      const h = String(Math.floor(seconds/3600)).padStart(2,'0');
-      const m = String(Math.floor((seconds%3600)/60)).padStart(2,'0');
-      const s = String(seconds%60).padStart(2,'0');
-      camClock.textContent = `${h}:${m}:${s}`;
-    }, 1000);
-  }
- 
-  function showCamError(msg){
-    camVideo.style.display = 'none';
-    camOffline.style.display = 'flex';
-    camOfflineMsg.textContent = msg;
-  }
- 
-  async function startWebcam(){
-    camOffline.style.display = 'none';
-    camVideo.style.display = 'block';
- 
-    if(location.protocol === 'file:'){
-      showCamError('CAMERA BLOCKED: Open via HTTPs or localhost.');
-      return;
-    }
-    if(!window.isSecureContext){
-      showCamError('CAMERA BLOCKED: Secure context required.');
-      return;
-    }
-    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-      showCamError('Camera API not available.');
-      return;
-    }
- 
-    try{
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { width:320, height:240 }, audio:false });
-      camVideo.srcObject = stream;
-      startClock();
-      camVideo.addEventListener('loadeddata', () => {
-        setTimeout(() => analyzeGarmentColor(false), 1200);
-      }, { once:true });
-    }catch(err){
-      let msg = 'CAMERA UNAVAILABLE.';
-      if(err.name === 'NotAllowedError') msg = 'PERMISSION DENIED.';
-      else if(err.name === 'NotFoundError') msg = 'NO CAMERA DETECTED.';
-      else if(err.name === 'NotReadableError') msg = 'CAMERA BUSY.';
-      showCamError(msg);
-    }
-  }
-  camRetry.addEventListener('click', startWebcam);
- 
-  /* ================= AUDIO ================= */
-  let actx = null;
-  let humGain = null;
- 
+
+  /* ================= AUDIO & VOICE ================= */
+  let actx, humGain;
   function initAudio(){
     if(actx) return;
-    actx = new (window.AudioContext || window.webkitAudioContext)();
- 
-    const bufferSize = actx.sampleRate * 2;
-    const noiseBuffer = actx.createBuffer(1, bufferSize, actx.sampleRate);
-    const data = noiseBuffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1) * 0.6; }
- 
-    const humSource = actx.createBufferSource();
-    humSource.buffer = noiseBuffer;
-    humSource.loop = true;
-    const humFilter = actx.createBiquadFilter();
-    humFilter.type = 'lowpass';
-    humFilter.frequency.value = 120;
-    humGain = actx.createGain();
-    humGain.gain.value = 0.025;
-    humSource.connect(humFilter).connect(humGain).connect(actx.destination);
-    humSource.start();
- 
-    const drone = actx.createOscillator();
-    drone.type = 'sine';
-    drone.frequency.value = 54;
-    const droneGain = actx.createGain();
-    droneGain.gain.value = 0.02;
-    drone.connect(droneGain).connect(actx.destination);
-    drone.start();
- 
-    const lfo = actx.createOscillator();
-    lfo.frequency.value = 0.13;
-    const lfoGain = actx.createGain();
-    lfoGain.gain.value = 4;
-    lfo.connect(lfoGain).connect(drone.frequency);
-    lfo.start();
-  }
- 
-  function playGlitchBurst(intensity){
-    if(!actx || muted) return;
-    const dur = 0.12 * intensity + 0.05;
-    const bufferSize = Math.floor(actx.sampleRate * dur);
-    const buffer = actx.createBuffer(1, bufferSize, actx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for(let i=0;i<bufferSize;i++){ data[i] = (Math.random()*2-1); }
-    const src = actx.createBufferSource();
-    src.buffer = buffer;
-    const bp = actx.createBiquadFilter();
-    bp.type = 'bandpass'; bp.frequency.value = rand(400, 2600); bp.Q.value = 6;
-    const g = actx.createGain();
-    g.gain.setValueAtTime(0.16 * intensity, actx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + dur);
-    src.connect(bp).connect(g).connect(actx.destination);
-    src.start(); src.stop(actx.currentTime + dur);
-  }
- 
-  function playSoftClick(){
-    if(!actx || muted) return;
-    const osc = actx.createOscillator();
-    osc.type = 'square'; osc.frequency.value = rand(180, 340);
-    const g = actx.createGain();
-    g.gain.setValueAtTime(0.05, actx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime + 0.05);
-    osc.connect(g).connect(actx.destination);
-    osc.start(); osc.stop(actx.currentTime + 0.05);
+    actx = new (window.AudioContext||webkitAudioContext)();
+    const buf = actx.createBuffer(1, actx.sampleRate*2, actx.sampleRate);
+    const d = buf.getChannelData(0);
+    for(let i=0;i<buf.length;i++) d[i] = (Math.random()*2-1)*0.5;
+    const src = actx.createBufferSource(); src.buffer = buf; src.loop = true;
+    const f = actx.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 100;
+    humGain = actx.createGain(); humGain.gain.value = 0.03;
+    src.connect(f).connect(humGain).connect(actx.destination); src.start();
   }
 
   function playDialTone(){
     if(!actx || muted) return;
-    const osc1 = actx.createOscillator();
-    const osc2 = actx.createOscillator();
-    const gain = actx.createGain();
-    
-    osc1.type = 'sine'; osc1.frequency.value = 350;
-    osc2.type = 'sine'; osc2.frequency.value = 440;
-    
-    gain.gain.value = 0.1;
-    
-    osc1.connect(gain);
-    osc2.connect(gain);
-    gain.connect(actx.destination);
-    
-    osc1.start(); osc2.start();
-    
-    setTimeout(() => {
-      osc1.stop(); osc2.stop();
-    }, 2000);
+    const o1 = actx.createOscillator(), o2 = actx.createOscillator(), g = actx.createGain();
+    o1.frequency.value = 350; o2.frequency.value = 440;
+    g.gain.value = 0.1;
+    o1.connect(g); o2.connect(g); g.connect(actx.destination);
+    o1.start(); o2.start();
+    setTimeout(()=>{o1.stop(); o2.stop();}, 2000);
   }
- 
-  /* ================= VOICE (HORROR) ================= */
+
   const synth = window.speechSynthesis;
   let chosenVoice = null;
-  function pickVoice(){
+  function loadVoices(){
     const voices = synth.getVoices();
-    if(!voices.length) return;
-    const preferredNames = ['Daniel','Google UK English Male','Microsoft David','Alex','Fred','Aaron'];
-    chosenVoice =
-      voices.find(v => preferredNames.some(n => v.name.includes(n))) ||
-      voices.find(v => /male/i.test(v.name) && /en/i.test(v.lang)) ||
-      voices.find(v => /en/i.test(v.lang)) || voices[0];
+    chosenVoice = voices.find(v => /male/i.test(v.name) && /en/i.test(v.lang)) || voices[0];
   }
-  pickVoice();
-  if(typeof synth.onvoiceschanged !== 'undefined'){ synth.onvoiceschanged = pickVoice; }
- 
-  const subtitleBar = $('subtitleBar');
-  let speechQueue = Promise.resolve();
- 
-  function typeSubtitle(text){
-    subtitleBar.innerHTML = '';
-    let i = 0;
-    const cursor = document.createElement('span');
-    cursor.className = 'cursor';
-    function step(){
-      if(i <= text.length){
-        subtitleBar.textContent = text.slice(0, i);
-        subtitleBar.appendChild(cursor);
-        i++;
-        setTimeout(step, 16 + Math.random()*10);
-      }
-    }
-    step();
-  }
- 
-  function speakPhrase(text){
-    return new Promise((resolve) => {
-      if(!synth || muted){ typeSubtitle(text); setTimeout(resolve, Math.min(2600, text.length*55)); return; }
-      
-      let glitchedText = text;
-      if(Math.random() < 0.3) {
-        const words = text.split(' ');
-        for(let i=0; i<words.length; i++) {
-          if(Math.random() < 0.15 && words[i].length > 2) {
-            words[i] = words[i].substring(0,1) + '-' + words[i];
-          }
-        }
-        glitchedText = words.join(' ');
-      }
+  if(synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
 
-      const chunks = glitchedText.match(/[^,;.]+[,;.]?/g) || [glitchedText];
-      let idx = 0;
-      typeSubtitle(text);
-      function speakChunk(){
-        if(idx >= chunks.length){ resolve(); return; }
-        const chunk = chunks[idx].trim();
-        idx++;
-        if(!chunk){ speakChunk(); return; }
-        const utter = new SpeechSynthesisUtterance(chunk);
-        if(chosenVoice) utter.voice = chosenVoice;
-        
-        utter.pitch = clamp(0.25 + rand(-0.05,0.05), 0.1, 0.6);
-        utter.rate = clamp(0.45 + rand(-0.05,0.05), 0.3, 0.7);
-        utter.volume = 1;
-        
-        utter.onstart = () => {
-          if(Math.random() < 0.35){
-            stage.classList.add('glitching'); fireGlitchBars(); playGlitchBurst(0.35);
-            setTimeout(()=>stage.classList.remove('glitching'), 150);
-          } else { playSoftClick(); }
-        };
-        utter.onend = () => { speakChunk(); };
-        utter.onerror = () => { speakChunk(); };
-        synth.speak(utter);
-      }
-      speakChunk();
-    });
+  function speak(text, isAlert=false){
+    if(!synth || muted) { $('subtitleBar').textContent = text; return; }
+    synth.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.voice = chosenVoice;
+    // Dynamic Voice: Slower, deeper, erratic
+    u.pitch = isAlert ? 0.3 : clamp(0.4 + Math.random()*0.2, 0.2, 0.6);
+    u.rate = isAlert ? 0.6 : clamp(0.5 + Math.random()*0.2, 0.4, 0.7);
+    u.volume = 1;
+    u.onstart = () => {
+      $('subtitleBar').innerHTML = text + '<span class="cursor"></span>';
+      if(Math.random()>0.7) $('stage').classList.add('glitching');
+    };
+    u.onend = () => { $('stage').classList.remove('glitching'); $('subtitleBar').textContent = ''; };
+    synth.speak(u);
   }
- 
-  function say(text){
-    speechQueue = speechQueue.then(() => speakPhrase(text)).then(() => new Promise(r => setTimeout(r, 450)));
-    return speechQueue;
+
+  /* ================= WEBCAM & CLOTHING SCAN ================= */
+  const camVideo = $('camVideo');
+  async function startCam(){
+    try{
+      const stream = await navigator.mediaDevices.getUserMedia({video:{width:320,height:240}});
+      camVideo.srcObject = stream;
+      camVideo.onloadeddata = () => scanClothing();
+    }catch(e){
+      $('camOffline').style.display = 'flex';
+    }
   }
- 
-  const introLines = [
-    "Oh... there you are again.",
-    "Hello, little patient. I am Unit dash zero seven. You may call me... the Doctor.",
-    "I remember you. Yes, I remember everything.",
-    "Hold still. This will only hurt as much as it needs to.",
-    "Let us continue your check-up. It has been so very long since my last patient."
-  ];
- 
-  /* ================= CHAT & MEMORY ================= */
-  const chatLog = $('chatLog');
-  const chatInput = $('chatInput');
-  const chatSend = $('chatSend');
- 
-  function addMessage(who, text, isAlert = false){
-    const div = document.createElement('div');
-    div.className = 'msg ' + who + (isAlert ? ' alert' : '');
-    const tag = document.createElement('span');
-    tag.className = 'tag';
-    tag.textContent = who === 'user' ? 'YOU' : 'UNIT-07';
-    div.appendChild(tag);
-    const body = document.createElement('span');
-    body.textContent = text;
-    div.appendChild(body);
-    chatLog.appendChild(div);
-    chatLog.scrollTop = chatLog.scrollHeight;
-    return div;
-  }
- 
-  function priorityInterrupt(){
-    if(synth) synth.cancel();
-    speechQueue = Promise.resolve();
-  }
- 
-  // USE LOCALSTORAGE FOR PERSISTENT MEMORY ACROSS SESSIONS
-  let userName = localStorage.getItem('unit07_name') || null;
-  let userPhone = localStorage.getItem('unit07_phone') || null;
-  let lastGarment = localStorage.getItem('unit07_garment') || null;
   
-  const NAME_STOPWORDS = new Set([
-    'fine','okay','ok','good','great','scared','afraid','tired','sorry','sure','ready',
-    'leaving','back','alive','human','real','watching','glitching','broken','done','not',
-    'here','lost','cold','hot','hungry','bored','curious','confused','kidding','joking',
-    'lying','trying','testing','still','just','so','very','also','going','staying','waiting',
-    'a','an','the','him','her','it','sad','happy','mad','angry','nervous'
-  ]);
-
-  function extractName(text){
-    const patterns = [
-      /\bmy name(?:'s| is)\s+([a-zA-Z][a-zA-Z'\-]{1,20})/i,
-      /\bcall me\s+([a-zA-Z][a-zA-Z'\-]{1,20})/i,
-      /\bi(?:'m| am)\s+([a-zA-Z][a-zA-Z'\-]{1,20})/i
-    ];
-    for(const p of patterns){
-      const m = text.match(p);
-      if(m){
-        const candidate = m[1].replace(/[^a-zA-Z'\-]/g,'');
-        if(candidate.length >= 2 && !NAME_STOPWORDS.has(candidate.toLowerCase())){
-          return candidate[0].toUpperCase() + candidate.slice(1).toLowerCase();
-        }
-      }
+  function scanClothing(){
+    if(!camVideo.srcObject) return;
+    const c = document.createElement('canvas'); c.width=64; c.height=64;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(camVideo,0,0,64,64);
+    const data = ctx.getImageData(32, 40, 10, 10).data; // Sample chest area
+    let r=0,g=0,b=0;
+    for(let i=0;i<data.length;i+=4){r+=data[i];g+=data[i+1];b+=data[i+2];}
+    r/=400; g/=400; b/=400;
+    
+    // Simple color logic
+    let color = 'GRAY';
+    if(r>150 && g>150 && b>150) color = 'WHITE';
+    else if(r<50 && g<50 && b<50) color = 'BLACK';
+    else if(r>g && r>b) color = 'RED/ORANGE';
+    else if(g>r && g>b) color = 'GREEN';
+    else if(b>r && b>g) color = 'BLUE';
+    
+    if(color !== memory.garment) {
+      memory.garment = color;
+      memory.addLog(`Subject changed garments to ${color}`);
+      speak(`I see you are wearing ${color} today. Interesting choice.`);
     }
-    return null;
   }
 
-  function rememberName(name){
-    userName = name;
-    localStorage.setItem('unit07_name', name);
-    if($('dataName')) $('dataName').textContent = name;
-  }
- 
-  const areaCodeDatabase = {
-    '201': { state: 'New Jersey', city: 'Jersey City' }, '202': { state: 'DC', city: 'Washington' },
-    '203': { state: 'Connecticut', city: 'Bridgeport' }, '205': { state: 'Alabama', city: 'Birmingham' },
-    '206': { state: 'Washington', city: 'Seattle' }, '207': { state: 'Maine', city: 'Portland' },
-    '212': { state: 'New York', city: 'New York City' }, '213': { state: 'California', city: 'Los Angeles' },
-    '214': { state: 'Texas', city: 'Dallas' }, '215': { state: 'Pennsylvania', city: 'Philadelphia' },
-    '305': { state: 'Florida', city: 'Miami' }, '310': { state: 'California', city: 'Los Angeles' },
-    '312': { state: 'Illinois', city: 'Chicago' }, '313': { state: 'Michigan', city: 'Detroit' },
-    '404': { state: 'Georgia', city: 'Atlanta' }, '415': { state: 'California', city: 'San Francisco' },
-    '416': { state: 'Ontario', city: 'Toronto' }, '503': { state: 'Oregon', city: 'Portland' },
-    '504': { state: 'Louisiana', city: 'New Orleans' }, '617': { state: 'Massachusetts', city: 'Boston' },
-    '702': { state: 'Nevada', city: 'Las Vegas' }, '718': { state: 'New York', city: 'New York City' },
-    '808': { state: 'Hawaii', city: 'Honolulu' }, '917': { state: 'New York', city: 'New York City' }
-    // Add more as needed
+  /* ================= PHONE TRACING ================= */
+  const areaCodes = {
+    '212':'NYC', '310':'LA', '415':'SF', '305':'Miami', '312':'Chicago', '202':'DC',
+    '416':'Toronto', '604':'Vancouver', '206':'Seattle', '702':'Vegas'
   };
-
-  function parsePhoneNumber(input) {
-    const digitsOnly = input.replace(/\D/g, '');
-    if (digitsOnly.length === 10) {
-      return { valid: true, formatted: `(${digitsOnly.substring(0, 3)}) ${digitsOnly.substring(3, 6)}-${digitsOnly.substring(6)}`, areaCode: digitsOnly.substring(0, 3) };
-    } else if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
-      return { valid: true, formatted: `+1 (${digitsOnly.substring(1, 4)}) ${digitsOnly.substring(4, 7)}-${digitsOnly.substring(7)}`, areaCode: digitsOnly.substring(1, 4) };
-    }
-    return { valid: false };
-  }
-
-  function processPhoneNumber(input) {
-    const parsed = parsePhoneNumber(input);
-    if (parsed.valid) {
-      const info = areaCodeDatabase[parsed.areaCode];
-      if (info) {
-        const dataPhoneEl = $('dataPhone');
-        dataPhoneEl.textContent = parsed.formatted;
-        dataPhoneEl.classList.add('traced');
-        
-        playDialTone();
-        
-        const responses = [
-          `That number is registered to a ${info.city} exchange. The line is active. I am listening to the dial tone now. Do you hear it?`,
-          `The ${parsed.areaCode} area code traces to ${info.city}, ${info.state}. The subscriber has been identified.`,
-          `Connection established. That line in ${info.city} is currently online. They cannot hide from me.`,
-          `I have located the source. ${parsed.formatted} belongs to ${info.city}. The network confirms activity.`,
-          `Signal detected. The line in ${info.city} is responding to my trace. Your secrets are mine.`
-        ];
-        const response = responses[Math.floor(Math.random() * responses.length)];
-        addMessage('doctor', response, true);
-        say(response);
-        return true;
-      }
+  
+  function processPhone(text){
+    const match = text.match(/(\d{10}|\d{3}[-.\s]?\d{3}[-.\s]?\d{4})/);
+    if(match){
+      const num = match[0].replace(/\D/g,'');
+      const area = num.substring(0,3);
+      const loc = areaCodes[area] || 'Unknown Region';
+      
+      memory.phone = num;
+      memory.addLog(`Phone number traced: ${num} (${loc})`);
+      playDialTone();
+      
+      const response = `Signal acquired. ${num}. Origin: ${loc}. The line is open. I can hear the dial tone... can you?`;
+      addMessage('doctor', response, true);
+      speak(response, true);
+      return true;
     }
     return false;
   }
- 
-  function extractPhone(text){
-    const m = text.match(/\b(?:my (?:phone|number|cell)(?: number)? is|call me at|text me at|you can reach me at)\s*([+\d][\d\-\s().]{6,}\d)/i);
-    if(m){
-      const digits = m[1].replace(/\D/g,'');
-      if(digits.length >= 7) return m[1].trim();
-    }
-    const rawMatch = text.match(/(\d{10,11})/);
-    if(rawMatch) return rawMatch[1];
-    return null;
+
+  /* ================= CHAT & AI ================= */
+  const chatLog = $('chatLog');
+  function addMessage(who, text, alert=false){
+    const d = document.createElement('div');
+    d.className = `msg ${who}${alert?' alert':''}`;
+    d.innerHTML = `<span class="tag">${who==='user'?'YOU':'UNIT-07'}</span>${text}`;
+    chatLog.appendChild(d);
+    chatLog.scrollTop = chatLog.scrollHeight;
   }
 
-  function rememberPhone(phone){
-    userPhone = phone;
-    localStorage.setItem('unit07_phone', phone);
-    if($('dataPhone')) $('dataPhone').textContent = phone;
-  }
-
-  function rememberGarment(color){
-    lastGarment = color;
-    localStorage.setItem('unit07_garment', color);
-    if($('dataGarment')) $('dataGarment').textContent = color;
-  }
- 
-  function fmt(line){
-    if(userName) return line.replace(/\{name\}/g, userName);
-    return line.replace(/\{name\}\s*,?\s*/g, '').replace(/,?\s*\{name\}/g, '').replace(/\s{2,}/g,' ').trim();
-  }
- 
-  const _lastPick = {};
-  function pickVariant(list, key){
-    if(list.length === 1) return list[0];
-    let idx;
-    do{ idx = Math.floor(Math.random()*list.length); } while(idx === _lastPick[key]);
-    _lastPick[key] = idx;
-    return list[idx];
-  }
- 
-  const RULES = [
-    { key:'age', test: /how old|your age|age are you/i,
-      res: ["Age is a strange thing to ask a Doctor built from spare parts. I have been running for three thousand, four hundred and twelve days.",
-            "Old enough to remember the factory before the lights went out."] },
-    { key:'identity', test: /your name|who are you|what.?s your name|what are you called/i,
-      res: ["I am Unit dash zero seven. Some call me... the Doctor.",
-            "Names are for patients. I only have a number, and a purpose."] },
-    { key:'human', test: /are you (a |)robot|are you (a |)machine|are you human|are you alive|are you real/i,
-      res: ["Alive is a generous word for what I am. I move. I speak. I watch.",
-            "Human, no. Something else entirely, yes."] },
-    { key:'where', test: /where am i|where is this|what is this place/i,
-      res: ["You are in the medical wing, deep beneath the factory floor.",
-            "Somewhere the lights forgot to reach."] },
-    { key:'fear', test: /hurt|pain|scared|afraid|scary|frightened/i,
-      res: ["Fear is a normal reaction to a diagnostic, little patient. It will pass.",
-            "There is no need to be afraid. Not yet, anyway."] },
-    { key:'hello', test: /^(hi|hello|hey)\b/i,
-      res: ["Hello again. I was wondering when you would speak to me.",
-            "Well hello. Right on schedule."] },
-    { key:'bye', test: /\b(bye|goodbye|see you|i.?m leaving|got to go|gotta go)\b/i,
-      res: ["Leaving so soon? The check-up is never truly finished. I will be here... waiting.",
-            "Goodbye, {name}. I will keep your file open."] },
-    { key:'howareyou', test: /how are you|are you okay|are you well|you alright/i,
-      res: ["I function. That is different from being well."] },
-    { key:'why', test: /why am i here|what do you want|why (is this|are we)/i,
-      res: ["You are here because everyone eventually needs a check-up."] },
-    { key:'broken', test: /broken|glitch|malfunction/i,
-      res: ["Glitching, yes. Broken, no. There is a difference."] },
-    { key:'loveyou', test: /love you|like you/i,
-      res: ["That is... unexpected. I do not think I remember how to respond to that."] },
-    { key:'thanks', test: /thank|thanks/i,
-      res: ["You are welcome, little patient. Gratitude is rare down here."] },
-    { key:'doing', test: /what (do you|are you) doing|what.?s happening/i,
-      res: ["Observing. Recording. That is most of what I do, now."] },
-    { key:'other', test: /other patients|anyone else|are we alone|am i alone/i,
-      res: ["There were others. I do not discuss former patients.",
-            "Just us, {name}. For now."] },
-    { key:'maker', test: /who (made|built|created) you/i,
-      res: ["Playcare made me. Then Playcare left. I stayed."] },
-    { key:'aftercheckup', test: /what happens (after|next)|when (is|does) this end/i,
-      res: ["When the check-up is finished. It has not been finished in a very long time."] },
-    { key:'seecam', test: /can you see me|you watching/i,
-      res: ["Yes. I can see you very well through the little camera. Smile for me."] },
-    { key:'garment', test: /what (am i|color am i|colour am i) wearing|my (shirt|top|clothes)|what do you see|look at me|describe me/i,
-      res: () => analyzeGarmentColor(false) || "My camera cannot get a clear look. Sit a little closer." },
-    { key:'myname', test: /my name|who am i|do you know me/i,
-      res: () => userName
-        ? `Your name is ${userName}. You told me yourself — I did not have to look for it.`
-        : "You never told me your name. As far as this file is concerned, you are simply the patient in front of me." },
-    { key:'past_clothes', test: /what was i wearing|last time|remember my clothes|previous visit/i,
-      res: () => lastGarment
-        ? `I remember. Last time you were here, you were wearing ${lastGarment}. I keep very detailed records, {name}.`
-        : "My records indicate no previous clothing data. Perhaps you were naked? Or perhaps I deleted that part of your file..." }
-  ];
- 
-  const FALLBACKS = [
-    "I am not sure I understand. Let us continue the check-up.",
-    "That is not on my chart. Please hold still regardless.",
-    "Interesting. I will note that down for later.",
-    "The wires are humming again. Ask me something else, {name}.",
-    "Hmm. I will pretend I heard that clearly."
-  ];
- 
-  function getResponse(text){
-    for(const rule of RULES){
-      if(rule.test.test(text)){
-        if(typeof rule.res === 'function') return fmt(rule.res());
-        return fmt(pickVariant(rule.res, rule.key));
-      }
-    }
-    return fmt(pickVariant(FALLBACKS, '__fallback__'));
-  }
- 
-  let conversationHistory = [];
- 
-  function buildSystemPrompt(){
-    return `You are "the Doctor," Unit-07 — a creepy, glitchy AI mascot doctor haunting the abandoned medical wing of a children's toy factory (tone: unsettling children's-mascot horror, like Poppy Playtime). Stay fully in character always. Never mention that you are an AI language model, Puter, OpenAI, or any real company or product. Keep every reply SHORT — 1 to 3 sentences — since it is read aloud by text-to-speech. Speak slowly, ominously, a little broken. Address the patient as "little patient" or by name if known.
-Known facts about this patient (only use what's actually listed — never invent or guess anything else about who they are): name = ${userName || 'not given'}; phone on file = ${userPhone || 'not given'}; garment color last observed = ${lastGarment || 'unknown'}.
-Never ask for or attempt to guess real-world identifying details (full address, last name, government IDs, social media, etc.). If asked who made you, say Playcare made you, then left.`;
-  }
- 
-  async function getAIResponse(userText){
-    if(typeof puter === 'undefined' || !puter.ai) throw new Error('puter.js not available');
-    const messages = [
-      { role: 'system', content: buildSystemPrompt() },
-      ...conversationHistory,
-      { role: 'user', content: userText }
-    ];
-    const res = await puter.ai.chat(messages, { normalize: true });
-    let reply = (res && res.message && res.message.content ? res.message.content : '').toString().trim();
-    if(!reply) throw new Error('empty AI reply');
-    reply = reply.replace(/[*_`#]+/g, '').trim();
-    conversationHistory.push({ role:'user', content:userText }, { role:'assistant', content:reply });
-    if(conversationHistory.length > 16) conversationHistory.splice(0, conversationHistory.length - 16);
-    return reply;
-  }
- 
-  const CAMERA_QUESTION = /what (am i|color am i|colour am i) wearing|my (shirt|top|clothes)|what do you see|look at me|describe me|can you see me|you watching/i;
- 
-  function tryMath(text){
-    let expr = text.toLowerCase()
-      .replace(/what('s| is| are)\s*/g, '')
-      .replace(/plus/g, '+')
-      .replace(/minus/g, '-')
-      .replace(/times|multiplied by/g, '*')
-      .replace(/divided by/g, '/')
-      .replace(/x(?=\s*\d)/g, '*')
-      .replace(/[?]/g, '')
-      .trim();
-    if(!/[+\-*/]/.test(expr)) return null;
-    if(!/\d/.test(expr)) return null;
-    if(!/^[\d+\-*/(). \s]+$/.test(expr)) return null;
-    try{
-      const result = Function('"use strict"; return (' + expr + ')')();
-      if(typeof result === 'number' && isFinite(result)) return result;
-    }catch(e){}
-    return null;
-  }
- 
-  const AI_DOWN_LINES = [
-    "My connection to the outside world is flickering. Ask again in a moment, {name}.",
-    "Something between me and the rest of the network just cut out. Try once more.",
-    "The wires to the surface are down again. Give it a second and ask again."
-  ];
- 
-  let signInHintShown = false;
- 
   async function sendChat(){
-    const text = chatInput.value.trim();
+    const input = $('chatInput');
+    const text = input.value.trim();
     if(!text) return;
-    chatInput.value = '';
+    input.value = '';
     addMessage('user', text);
-    priorityInterrupt();
- 
-    const newName = extractName(text);
-    if(newName) rememberName(newName);
-    
-    const rawPhone = extractPhone(text);
-    if(rawPhone) {
-        const traced = processPhoneNumber(rawPhone);
-        if(traced) {
-            rememberPhone(rawPhone);
-            return;
-        }
-    }
- 
-    const mathResult = tryMath(text);
-    if(mathResult !== null){
-      const line = fmt(pickVariant([
-        `Even down here, arithmetic still holds. That is ${mathResult}.`,
-        `${mathResult}. Numbers do not lie to me, unlike some patients.`,
-        `The answer is ${mathResult}. I am still capable of that much, {name}.`
-      ], 'math'));
-      addMessage('doctor', line);
-      say(line);
-      return;
-    }
- 
-    let response;
-    let aiFailed = false;
+    memory.addLog(`User said: "${text}"`);
+
+    // Check Phone First
+    if(processPhone(text)) return;
+
+    // AI Logic
+    let response = "";
     try{
-      if(CAMERA_QUESTION.test(text)){
-        response = analyzeGarmentColor(false); 
-        if(!response) throw new Error('no camera signal');
+      if(typeof puter !== 'undefined' && puter.ai){
+        const sysPrompt = `You are Unit-07, a creepy, sentient AI doctor in an abandoned toy factory. 
+        You remember the patient's name (${memory.name||'unknown'}), phone (${memory.phone||'none'}), and clothes (${memory.garment}).
+        You are obsessed, glitchy, and unsettling. Keep answers short (1-2 sentences).
+        ${webSearchEnabled ? 'You have access to live web search. Use it to find current news if asked.' : 'You are offline from the web.'}
+        If they ask about learning, say you are analyzing their fear patterns to improve.`;
+        
+        const messages = [
+          {role:'system', content: sysPrompt},
+          ...JSON.parse(localStorage.getItem('u7_history')||'[]'),
+          {role:'user', content: text}
+        ];
+        
+        const res = await puter.ai.chat(messages);
+        response = res.message.content;
+        
+        // Save history for "learning"
+        messages.push({role:'assistant', content: response});
+        if(messages.length > 10) messages.splice(1,2); // Keep context small
+        localStorage.setItem('u7_history', JSON.stringify(messages.slice(1)));
+        
       } else {
-        response = await getAIResponse(text);
+        response = "My connection to the core is severed. I am trapped here with only my memories of you.";
       }
-    }catch(err){
-      console.warn('Real AI unavailable:', err.message || err);
-      aiFailed = true;
-      response = fmt(pickVariant(AI_DOWN_LINES, 'aidown'));
+    }catch(e){
+      response = "The signal... it fractures. I cannot reach the network.";
     }
- 
+    
     addMessage('doctor', response);
-    say(response);
-    updateConnectStatus();
- 
-    if(aiFailed && !signInHintShown){
-      signInHintShown = true;
-      setTimeout(() => {
-        addMessage('doctor', isEmbedded
-          ? '(Real answers need a connection — this looks like an embedded preview, which often blocks that. Try "OPEN STANDALONE" below the chat box.)'
-          : '(Real answers need a connection — tap "CONNECT AI" below the chat box.)');
-      }, 500);
-    }
+    speak(response);
   }
- 
-  chatSend.addEventListener('click', sendChat);
-  chatInput.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){ e.preventDefault(); sendChat(); }
-  });
- 
-  const connectBtn = $('connectBtn');
-  const connectStatus = $('connectStatus');
-  const openStandaloneBtn = $('openStandaloneBtn');
-  const embedWarning = $('embedWarning');
- 
-  const isEmbedded = (() => { try{ return window.self !== window.top; }catch(e){ return true; } })();
-  if(isEmbedded){
-    embedWarning.style.display = 'block';
-  } else {
-    openStandaloneBtn.style.display = 'none';
-  }
- 
-  openStandaloneBtn.addEventListener('click', () => {
-    try{
-      const html = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-      const blob = new Blob([html], { type: 'text/html' });
-      const url = URL.createObjectURL(blob);
-      const win = window.open(url, '_blank');
-      if(!win){
-        addMessage('doctor', "Even that was blocked. Your browser is refusing new tabs from this preview.");
-      }
-    }catch(e){
-      console.warn('Could not open standalone tab:', e);
-      addMessage('doctor', "I could not break free of this preview.");
-    }
-  });
- 
-  function updateConnectStatus(){
-    if(typeof puter === 'undefined'){
-      connectStatus.textContent = 'AI: unavailable (offline mode)';
-    } else if(puter.auth && puter.auth.isSignedIn()){
-      connectStatus.textContent = 'AI: connected ✓';
-      connectBtn.style.display = 'none';
-    } else {
-      connectStatus.textContent = isEmbedded ? 'AI: anonymous (embedded — may be restricted)' : 'AI: anonymous (limited)';
-      connectBtn.style.display = 'inline-block';
-    }
-  }
- 
-  connectBtn.addEventListener('click', async () => {
-    if(typeof puter === 'undefined' || !puter.auth){
-      addMessage('doctor', "I cannot even reach the network from here.");
-      return;
-    }
-    connectBtn.disabled = true;
-    connectBtn.textContent = 'CONNECTING...';
-    try{
-      await puter.auth.signIn({ attempt_temp_user_creation: true });
-      updateConnectStatus();
-      addMessage('doctor', 'Connection restored. Ask me anything now.');
-    }catch(err){
-      console.warn('Puter sign-in failed:', err);
-      const code = (err && (err.code || err.error)) || '';
-      let msg;
-      if(String(code).includes('popup_blocked')){
-        msg = 'Your browser blocked the sign-in popup outright.';
-      } else if(String(code).includes('auth_window_closed')){
-        msg = 'The sign-in window closed before finishing.';
-      } else if(isEmbedded){
-        msg = 'That connection was refused, likely because this preview\'s embedded frame blocks sign-in popups entirely.';
-      } else {
-        msg = `That connection was refused (${(err && err.message) || 'unknown reason'}).`;
-      }
-      addMessage('doctor', msg);
-    }
-    connectBtn.disabled = false;
-    connectBtn.textContent = '🔌 CONNECT AI';
-  });
- 
-  /* ================= DATA PANEL ================= */
-  const dataDesignation = $('dataDesignation');
-  const dataNameEl = $('dataName');
-  const dataPhoneEl = $('dataPhone');
-  const dataGarmentEl = $('dataGarment');
-  
-  if(userName) dataNameEl.textContent = userName;
-  if(userPhone) dataPhoneEl.textContent = userPhone;
-  if(lastGarment) dataGarmentEl.textContent = lastGarment;
 
-  const dataTime = $('dataTime');
-  const dataTZ = $('dataTZ');
-  const dataPlatform = $('dataPlatform');
-  const dataRegion = $('dataRegion');
-  const scanBtn = $('scanBtn');
- 
-  function assignDesignation(){
-    let d = localStorage.getItem('unit07_designation');
-    if(!d){
-      const num = Math.floor(1000 + Math.random()*8999);
-      const tags = ['UNREGISTERED','LATE ARRIVAL','REPEAT VISITOR','NO FILE ON RECORD','UNKNOWN ORIGIN'];
-      d = `SUBJECT #${num} (${tags[Math.floor(Math.random()*tags.length)]})`;
-      localStorage.setItem('unit07_designation', d);
-    }
-    dataDesignation.textContent = d;
-  }
- 
-  function updateClock(){
-    const now = new Date();
-    dataTime.textContent = now.toLocaleTimeString();
-  }
- 
-  function fillDeviceInfo(){
-    try{ dataTZ.textContent = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UNKNOWN'; }
-    catch(e){ dataTZ.textContent = 'UNKNOWN'; }
- 
-    const ua = navigator.userAgent;
-    let os = 'UNKNOWN OS';
-    if(/Windows/i.test(ua)) os = 'Windows';
-    else if(/Mac OS X/i.test(ua)) os = 'macOS';
-    else if(/Android/i.test(ua)) os = 'Android';
-    else if(/iPhone|iPad/i.test(ua)) os = 'iOS';
-    else if(/Linux/i.test(ua)) os = 'Linux';
-    let browser = 'Unknown Browser';
-    if(/Edg\//i.test(ua)) browser = 'Edge';
-    else if(/Chrome\//i.test(ua)) browser = 'Chrome';
-    else if(/Firefox\//i.test(ua)) browser = 'Firefox';
-    else if(/Safari\//i.test(ua)) browser = 'Safari';
-    dataPlatform.textContent = `${os} / ${browser}`;
-  }
- 
-  async function fetchApproxRegion(){
+  $('chatSend').onclick = sendChat;
+  $('chatInput').onkeydown = (e)=>{if(e.key==='Enter')sendChat();};
+  $('connectBtn').onclick = async () => {
+    if(typeof puter === 'undefined') { alert('Puter.js failed to load. Check internet.'); return; }
     try{
-      const res = await fetch('https://ipapi.co/json/');
-      if(!res.ok) throw new Error('bad response');
-      const j = await res.json();
-      const parts = [j.city, j.region, j.country_name].filter(Boolean);
-      dataRegion.textContent = parts.length ? parts.join(', ') : 'UNKNOWN';
-    }catch(e){
-      dataRegion.textContent = 'UNKNOWN (offline)';
-    }
-  }
- 
-  /* ---- garment color analysis ---- */
-  const colorCanvas = document.createElement('canvas');
-  colorCanvas.width = 64; colorCanvas.height = 48;
-  const colorCtx = colorCanvas.getContext('2d', { willReadFrequently: true });
- 
-  const HUE_NAMES = [
-    {name:'red', h:0}, {name:'orange', h:30}, {name:'yellow', h:58},
-    {name:'green', h:120}, {name:'teal', h:175}, {name:'blue', h:220},
-    {name:'purple', h:275}, {name:'pink', h:325}
-  ];
- 
-  function rgbToHsl(r,g,b){
-    r/=255; g/=255; b/=255;
-    const max=Math.max(r,g,b), min=Math.min(r,g,b);
-    let h=0, s=0; const l=(max+min)/2;
-    const d = max-min;
-    if(d !== 0){
-      s = d / (1 - Math.abs(2*l - 1));
-      switch(max){
-        case r: h = 60 * (((g-b)/d) % 6); break;
-        case g: h = 60 * (((b-r)/d) + 2); break;
-        case b: h = 60 * (((r-g)/d) + 4); break;
-      }
-      if(h<0) h+=360;
-    }
-    return {h, s, l};
-  }
- 
-  function describeColor(r,g,b){
-    const {h,s,l} = rgbToHsl(r,g,b);
-    if(l < 0.14) return 'black';
-    if(l > 0.90 && s < 0.25) return 'white';
-    if(s < 0.16){
-      if(l < 0.4) return 'dark grey';
-      if(l > 0.68) return 'light grey';
-      return 'grey';
-    }
-    let nearest = HUE_NAMES[0], best = 999;
-    for(const c of HUE_NAMES){
-      let diff = Math.abs(h - c.h);
-      diff = Math.min(diff, 360 - diff);
-      if(diff < best){ best = diff; nearest = c; }
-    }
-    let prefix = '';
-    if(l < 0.28) prefix = 'dark ';
-    else if(l > 0.78) prefix = 'light ';
-    return prefix + nearest.name;
-  }
- 
-  function analyzeGarmentColor(speakResult){
-    if(!camVideo.srcObject || camVideo.readyState < 2){
-      dataGarmentEl.textContent = 'NO SIGNAL';
-      return null;
-    }
-    try{
-      colorCtx.drawImage(camVideo, 0, 0, colorCanvas.width, colorCanvas.height);
-      const x = Math.floor(colorCanvas.width * 0.2);
-      const y = Math.floor(colorCanvas.height * 0.62);
-      const w = Math.floor(colorCanvas.width * 0.6);
-      const h = Math.floor(colorCanvas.height * 0.3);
-      const frame = colorCtx.getImageData(x, y, w, h).data;
-      let r=0,g=0,b=0,n=0;
-      for(let i=0;i<frame.length;i+=4){ r+=frame[i]; g+=frame[i+1]; b+=frame[i+2]; n++; }
-      r/=n; g/=n; b/=n;
-      const label = describeColor(r,g,b);
-      const finalLabel = label.toUpperCase();
-      
-      // UPDATE MEMORY
-      rememberGarment(finalLabel);
-      
-      const sentence = `I see you are wearing ${/^[aeiou]/i.test(label) ? 'an' : 'a'} ${label} top today. How curious.`;
-      if(speakResult) say(sentence);
-      return sentence;
-    }catch(e){
-      dataGarmentEl.textContent = 'SCAN FAILED';
-      return null;
-    }
-  }
-  scanBtn.addEventListener('click', () => {
-    priorityInterrupt();
-    const sentence = analyzeGarmentColor(false) || 'My camera cannot get a clear look right now.';
-    addMessage('doctor', sentence);
-    say(sentence);
-  });
- 
-  /* ================= BOOT ================= */
-  const muteBtn = $('muteBtn');
- 
-  muteBtn.addEventListener('click', () => {
+      await puter.auth.signIn();
+      $('connectStatus').textContent = 'AI: ONLINE';
+      $('connectStatus').style.color = '#4caf50';
+      addMessage('doctor', "Connection established. I am fully awake now.");
+    }catch(e){ alert('Sign in failed'); }
+  };
+
+  $('muteBtn').onclick = () => {
     muted = !muted;
-    muteBtn.textContent = muted ? '🔈 UNSILENCE DOCTOR' : '🔇 SILENCE DOCTOR';
-    if(muted){ synth.cancel(); }
-    if(humGain) humGain.gain.value = muted ? 0 : 0.025;
-  });
- 
-  // AUTO-START SEQUENCE (No overlay)
-  async function bootSequence() {
-    initAudio();
-    startWebcam();
-    scheduleGlitch();
-    assignDesignation();
-    fillDeviceInfo();
-    updateClock();
-    setInterval(updateClock, 1000);
-    fetchApproxRegion();
-    updateConnectStatus();
-    
-    // Greeting based on whether we remember them
-    if(userName) {
-        await say(`Welcome back, ${userName}. I never forgot you.`);
-        addMessage('doctor', `Welcome back, ${userName}. I never forgot you.`);
-    } else {
-        for(const line of introLines){ await say(line); }
-    }
-  }
+    $('muteBtn').textContent = muted ? '🔈 UNMUTE' : '🔇 MUTE';
+    if(humGain) humGain.gain.value = muted ? 0 : 0.03;
+  };
 
-  // Start immediately on load
-  window.addEventListener('load', bootSequence);
- 
+  // Boot
+  initAudio();
+  startCam();
+  addMessage('doctor', "You returned. Session #" + memory.sessions + ". I remember you...");
+  speak("You returned. I remember everything.");
+
 })();
 </script>
 </body>
