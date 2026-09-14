@@ -32,6 +32,14 @@
     font-family: 'Courier New', Courier, monospace;
     cursor: crosshair;
   }
+
+  /* Click hint for auto-start */
+  #clickHint {
+    position: fixed; top: 10px; left: 50%; transform: translateX(-50%);
+    color: #4a5268; font-size: 10px; z-index: 200; pointer-events: none;
+    text-align: center; opacity: 0.7; animation: fadeOut 5s forwards 2s;
+  }
+  @keyframes fadeOut { to { opacity: 0; } }
  
   /* ================= STAGE / BACKGROUND ================= */
   #stage{
@@ -275,6 +283,8 @@
 </style>
 </head>
 <body>
+
+<div id="clickHint">CLICK ANYWHERE TO INITIALIZE SYSTEMS...</div>
  
 <button id="muteBtn">🔇 SILENCE DOCTOR</button>
 <a href="https://developer.puter.com" target="_blank" rel="noopener"
@@ -415,6 +425,7 @@
   const rand = (a,b) => a + Math.random()*(b-a);
   const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
   let muted = false;
+  let initialized = false;
  
   /* ================= STARFIELD (drawn once, static) ================= */
   const starCanvas = $('starCanvas');
@@ -1583,8 +1594,12 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     if(humGain) humGain.gain.value = muted ? 0 : 0.025;
   });
  
-  // Initialize immediately on load
-  window.addEventListener('load', async () => {
+  // Auto-initialize on first click (browser policy requirement)
+  document.addEventListener('click', function initOnce() {
+    if(initialized) return;
+    initialized = true;
+    $('clickHint').style.display = 'none';
+    
     initAudio();
     startWebcam();
     scheduleGlitch();
@@ -1595,11 +1610,13 @@ Never ask for or attempt to guess real-world identifying details (full address, 
     fetchApproxRegion();
     updateConnectStatus();
     
-    // Start intro sequence after a brief delay
-    setTimeout(async () => {
-        for(const line of introLines){ await say(line); }
-    }, 1000);
-  });
+    // Start intro sequence
+    (async () => {
+      for(const line of introLines){ await say(line); }
+    })();
+    
+    document.removeEventListener('click', initOnce);
+  }, { once: true });
  
 })();
 </script>
