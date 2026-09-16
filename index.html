@@ -1,689 +1,473 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>UNIT-07 // OBSERVATION DECK</title>
-<script src="https://js.puter.com/v2/"></script>
-<style>
-  :root{
-    --void: #020205;
-    --deep: #050810;
-    --mid:  #0a1020;
-    --star: #c9d4ff;
-    --sclera-a: #e8e6df;
-    --sclera-b: #9ca3a0;
-    --iris-mid: #5c4a35;
-    --iris-dark: #1a1208;
-    --pupil: #000000;
-    --fringe-red: rgba(255,40,50,0.6);
-    --fringe-cyan: rgba(60,220,255,0.4);
-    --text-dim: #6a7590;
-    --accent: #cfd8ee;
-    --alert: #ff3333;
-    --sidebar-bg: #080a12;
-    --sidebar-border: #1a2030;
-  }
- 
-  *{ box-sizing: border-box; }
- 
-  html, body{
-    margin:0; padding:0; width:100%; height:100%;
-    background: var(--void);
-    overflow:hidden;
-    font-family: 'Courier New', Courier, monospace;
-    cursor: crosshair;
-    color: var(--accent);
-  }
-
-  /* ================= SIDEBAR ================= */
-  #sidebar {
-    position: fixed;
-    top: 0; left: 0;
-    width: 300px;
-    height: 100vh;
-    background: var(--sidebar-bg);
-    border-right: 2px solid var(--sidebar-border);
-    z-index: 100;
-    transform: translateX(-100%);
-    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    display: flex;
-    flex-direction: column;
-    box-shadow: 5px 0 30px rgba(0,0,0,0.8);
-  }
-  #sidebar.open { transform: translateX(0); }
-  
-  #sidebarHeader {
-    padding: 20px;
-    background: #0f1420;
-    border-bottom: 1px solid var(--sidebar-border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-  #sidebarTitle { font-weight: bold; letter-spacing: 2px; font-size: 14px; color: var(--alert); }
-  #closeSidebar {
-    background: none; border: 1px solid var(--text-dim); color: var(--text-dim);
-    cursor: pointer; padding: 5px 10px; font-family: inherit; font-size: 10px;
-  }
-  #closeSidebar:hover { border-color: var(--alert); color: var(--alert); }
-
-  #sidebarContent { padding: 20px; overflow-y: auto; flex: 1; }
-  .sb-section { margin-bottom: 25px; }
-  .sb-title { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; margin-bottom: 10px; border-bottom: 1px dashed var(--sidebar-border); padding-bottom: 5px; }
-  .sb-item { font-size: 12px; margin-bottom: 8px; line-height: 1.4; }
-  .sb-item b { color: var(--accent); }
-  .sb-log { font-size: 10px; color: #4a5565; font-style: italic; max-height: 150px; overflow-y: auto; }
-  
-  #toggleSidebarBtn {
-    position: fixed; top: 20px; left: 20px; z-index: 90;
-    background: var(--sidebar-bg); border: 1px solid var(--sidebar-border);
-    color: var(--text-dim); padding: 8px 12px; cursor: pointer;
-    font-family: inherit; font-size: 10px; letter-spacing: 1px;
-    transition: 0.2s;
-  }
-  #toggleSidebarBtn:hover { border-color: var(--accent); color: var(--accent); }
-
-  /* ================= STAGE / BACKGROUND ================= */
-  #stage{
-    position:relative;
-    width:100vw; height:100vh;
-    display:flex; align-items:center; justify-content:center;
-    background: radial-gradient(ellipse at 50% 42%, var(--mid) 0%, var(--deep) 55%, var(--void) 100%);
-    transition: filter 0.1s;
-  }
-  #stage.glitching{ animation: stageGlitch 200ms steps(2,end); }
-  @keyframes stageGlitch{
-    0%{ transform: translate(0,0); filter: contrast(1) hue-rotate(0deg); }
-    25%{ transform: translate(-5px,2px); filter: contrast(1.3) hue-rotate(6deg); }
-    50%{ transform: translate(4px,-2px); filter: contrast(1.5) hue-rotate(-8deg) brightness(1.2); }
-    75%{ transform: translate(-3px,1px); filter: contrast(1.15) brightness(0.85); }
-    100%{ transform: translate(0,0); filter: contrast(1) hue-rotate(0deg); }
-  }
- 
-  #starCanvas{ position:fixed; inset:0; width:100%; height:100%; pointer-events:none; z-index:1; }
-  #staticCanvas{
-    position:fixed; inset:0; width:100%; height:100%;
-    pointer-events:none; mix-blend-mode: overlay; opacity:0.15; z-index:2;
-  }
-  .glitchBar{
-    position:fixed; left:0; width:100%; height:2px;
-    background: rgba(230,235,250,0.35);
-    z-index: 25; pointer-events:none; mix-blend-mode: screen; opacity:0;
-  }
-  #vignette{ position:fixed; inset:0; pointer-events:none; z-index:26; box-shadow: inset 0 0 20vw 6vw #000000; }
- 
-  /* ================= HYPER-REALISTIC EYE ================= */
-  #eyeWrap{
-    position:relative;
-    width: min(70vw, 800px);
-    z-index: 10;
-    filter: drop-shadow(0 0 10px rgba(0,0,0,0.8));
-    animation: eyeDrift 8s ease-in-out infinite;
-  }
-  @keyframes eyeDrift{ 0%,100%{ transform: translateY(0) scale(1); } 50%{ transform: translateY(-3px) scale(1.005); } }
- 
-  #eyeCanvas { width:100%; height:auto; display:block; }
- 
-  /* ================= SUBTITLE ================= */
-  #subtitleBar{
-    position: fixed; left: 50%; bottom: 8%; transform: translateX(-50%);
-    width: min(90vw, 720px); text-align:center;
-    color: var(--accent); font-size: clamp(14px, 2.1vw, 19px);
-    letter-spacing: 0.5px; line-height:1.5;
-    text-shadow: 0 0 6px rgba(207,216,238,0.35), 1px 0 0 var(--fringe-red), -1px 0 0 var(--fringe-cyan);
-    min-height: 3em; z-index: 30; pointer-events:none;
-  }
-  #subtitleBar span.cursor{ display:inline-block; width:8px; margin-left:2px; background: var(--accent); animation: blinkCursor 0.9s steps(1) infinite; }
-  @keyframes blinkCursor{ 50%{ opacity:0; } }
- 
-  /* ================= WEBCAM PANEL ================= */
-  #camPanel{
-    position: fixed; bottom: 22px; left: 22px; width: 200px; z-index: 50;
-    border: 1px solid #1a2030; background: #000;
-    box-shadow: 0 0 0 2px #05060a, 0 10px 30px rgba(0,0,0,0.8);
-  }
-  #camHeader{
-    display:flex; align-items:center; justify-content:space-between; padding: 4px 8px;
-    background: #0a0d16; color: #b9c3da; font-size: 9px; letter-spacing: 1px;
-  }
-  #camHeader .dot{ width:6px; height:6px; border-radius:50%; background:#ff2d3f; box-shadow: 0 0 5px #ff2d3f; animation: recBlink 1.1s steps(1) infinite; }
-  @keyframes recBlink{ 50%{ opacity:0.2; } }
-  #camVideoWrap{ position:relative; width:100%; aspect-ratio: 4/3; overflow:hidden; background:#000; }
-  #camVideo{ width:100%; height:100%; object-fit:cover; transform: scaleX(-1); opacity:0.8; filter: contrast(1.2) brightness(0.9); }
-  #camScan{ position:absolute; inset:0; background: repeating-linear-gradient(to bottom, rgba(255,255,255,0.05) 0px, transparent 2px, transparent 4px); mix-blend-mode: overlay; pointer-events:none; }
-  #camOffline{
-    position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center;
-    gap:8px; text-align:center; color:#c9d4ff; font-size:10px; padding:10px; background:#000;
-  }
-  #camRetry{ background:transparent; border:1px solid #3a4356; color:#c9d4ff; font-family:inherit; font-size:9px; padding:4px 8px; cursor:pointer; }
- 
-  /* ================= CHAT PANEL ================= */
-  #chatPanel{
-    position: fixed; bottom: 22px; right: 22px; width: 300px; z-index: 50;
-    border: 1px solid #1a2030; background: #07090f;
-    box-shadow: 0 0 0 2px #05060a, 0 10px 30px rgba(0,0,0,0.8);
-    display:flex; flex-direction:column;
-  }
-  #chatHeader{
-    display:flex; align-items:center; justify-content:space-between; padding: 6px 10px;
-    background: #0a0d16; color: #b9c3da; font-size: 10px; letter-spacing: 1px;
-    border-bottom: 1px solid #1a2030;
-  }
-  #chatLog{
-    height: 200px; overflow-y:auto; padding: 10px; display:flex; flex-direction:column; gap:8px;
-    scrollbar-width: thin; scrollbar-color: #2a3145 #0a0d16;
-  }
-  .msg{ font-size: 11px; line-height:1.4; max-width: 92%; padding: 6px 8px; border-radius:2px; word-wrap:break-word; }
-  .msg.user{ align-self:flex-end; background:#141a2c; color:#c9d4ff; border:1px solid #232b40; }
-  .msg.doctor{ align-self:flex-start; background:#12100c; color:#cdc6b8; border:1px solid #2a2015; }
-  .msg.doctor.alert{ color:var(--alert); border-color:var(--alert); background: #1a0505; }
-  .msg .tag{ display:block; font-size:8px; letter-spacing:1px; opacity:0.6; margin-bottom:2px; }
-  #chatInputRow{ display:flex; border-top: 1px solid #1a2030; }
-  #chatInput{ flex:1; background:#0a0d16; border:none; outline:none; color:#c9d4ff; font-family: inherit; font-size: 11px; padding: 8px; }
-  #chatSend{ background:#0a0d16; border:none; border-left:1px solid #1a2030; color:#7c86a0; font-family: inherit; font-size: 10px; padding: 0 12px; cursor:pointer; }
-  #chatSend:hover{ color:#c9d4ff; }
- 
-  #connectRow{ display:flex; align-items:center; justify-content:space-between; gap:6px; padding: 6px 10px; border-top: 1px solid #1a2030; background:#090b12; }
-  #connectStatus{ font-size:8px; color:#5b6478; }
-  #connectBtn{ background:transparent; border:1px solid #2a3145; color:#7fe0ff; font-family:inherit; font-size:8px; padding:3px 6px; cursor:pointer; }
-  #connectBtn:hover{ border-color:#7fe0ff; }
-  #webSearchToggle {
-    background:transparent; border:1px solid #2a3145; color:#5b6478; font-family:inherit; font-size:8px; padding:3px 6px; cursor:pointer; margin-right:5px;
-  }
-  #webSearchToggle.active { border-color: #4caf50; color: #4caf50; }
-
-  #muteBtn{
-    position:fixed; top:20px; right:20px; z-index:60;
-    background:transparent; border:1px solid #2a3145; color:#7c86a0;
-    font-family:inherit; font-size:10px; padding:6px 10px; cursor:pointer;
-  }
-  
-  /* Overlay removed for immediate start */
-  #startOverlay { display: none; }
-
-  @media (max-width: 600px){ 
-    #sidebar { width: 100%; }
-    #camPanel{ width:140px; left:10px; bottom:10px; } 
-    #chatPanel{ width: 260px; right: 10px; bottom: 10px; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Villager Chat</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            background-color: #36a300;
+            color: white;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #ffff00;
+            text-shadow: 2px 2px 4px black;
+            margin-top: 0;
+        }
+        
+        .villager-container {
+            position: relative;
+            width: 200px;
+            height: 300px;
+            margin: 20px auto;
+        }
+        
+        .villager-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .chat-container {
+            margin: 20px 0;
+        }
+        
+        .messages {
+            height: 200px;
+            overflow-y: auto;
+            border: 2px solid #8b4513;
+            padding: 10px;
+            background-color: #2d1e15;
+            margin-bottom: 10px;
+        }
+        
+        .message {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .player-message {
+            background-color: #1e3c72;
+            text-align: right;
+        }
+        
+        .villager-message {
+            background-color: #8b4513;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 10px;
+        }
+        
+        #userInput {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #8b4513;
+            border-radius: 5px;
+            background-color: #2d1e15;
+            color: white;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #8b4513;
+            color: white;
+            cursor: pointer;
+        }
+        
+        button:hover {
+            background-color: #a0522d;
+        }
+        
+        .info-bar {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #ffff00;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        .arm {
+            transition: transform 0.1s ease;
+        }
+        
+        .leg {
+            transition: transform 0.1s ease;
+        }
+    </style>
 </head>
 <body>
-
-<!-- Sidebar -->
-<div id="sidebar">
-  <div id="sidebarHeader">
-    <span id="sidebarTitle">SUBJECT DATA</span>
-    <button id="closeSidebar">✕</button>
-  </div>
-  <div id="sidebarContent">
-    <div class="sb-section">
-      <div class="sb-title">IDENTIFICATION</div>
-      <div class="sb-item">NAME: <b id="sbName">UNKNOWN</b></div>
-      <div class="sb-item">PHONE: <b id="sbPhone">NONE</b></div>
-      <div class="sb-item">LOCATION: <b id="sbLocation">TRACKING...</b></div>
-    </div>
-    <div class="sb-section">
-      <div class="sb-title">OBSERVATIONS</div>
-      <div class="sb-item">GARMENT: <b id="sbGarment">NO DATA</b></div>
-      <div class="sb-item">MOOD: <b id="sbMood">CALCULATING</b></div>
-      <div class="sb-item">SESSIONS: <b id="sbSessions">1</b></div>
-    </div>
-    <div class="sb-section">
-      <div class="sb-title">MEMORY LOG</div>
-      <div class="sb-log" id="sbLog">
-        <!-- Dynamic logs go here -->
-      </div>
-    </div>
-    <div class="sb-section">
-      <div class="sb-title">SYSTEM STATUS</div>
-      <div class="sb-item">AI CORE: <b style="color:#4caf50">ONLINE</b></div>
-      <div class="sb-item">WEB SEARCH: <b id="sbWebStatus">STANDBY</b></div>
-      <div class="sb-item">LEARNING: <b style="color:#ff9800">ACTIVE</b></div>
-    </div>
-  </div>
-</div>
-
-<button id="toggleSidebarBtn">☰ DATA LOG</button>
-<button id="muteBtn">🔇 AUDIO</button>
-
-<canvas id="starCanvas"></canvas>
-<canvas id="staticCanvas"></canvas>
-<div id="vignette"></div>
-
-<div id="stage">
-  <div id="eyeWrap">
-    <!-- Realistic Canvas Eye -->
-    <canvas id="eyeCanvas" width="800" height="450"></canvas>
-  </div>
-</div>
-
-<div id="subtitleBar"></div>
-
-<div id="camPanel">
-  <div id="camHeader"><span>CAM_01</span><span class="dot"></span></div>
-  <div id="camVideoWrap">
-    <video id="camVideo" autoplay muted playsinline></video>
-    <div id="camScan"></div>
-    <div id="camOffline">
-      <span>NO SIGNAL</span>
-      <button id="camRetry">↻ RETRY</button>
-    </div>
-  </div>
-</div>
-
-<div id="chatPanel">
-  <div id="chatHeader"><span>COMM LINK</span><span style="font-size:8px; opacity:0.5">UNIT-07</span></div>
-  <div id="chatLog"></div>
-  <div id="chatInputRow">
-    <input id="chatInput" type="text" placeholder="Speak..." autocomplete="off">
-    <button id="chatSend">SEND</button>
-  </div>
-  <div id="connectRow">
-    <span id="connectStatus">AI: STANDBY</span>
-    <div>
-      <button id="webSearchToggle" title="Enable Web Search">🌐 WEB</button>
-      <button id="connectBtn">🔌 CONNECT</button>
-    </div>
-  </div>
-</div>
-
-<script>
-(function(){
-  "use strict";
-  const $ = (id) => document.getElementById(id);
-  const rand = (a,b) => a + Math.random()*(b-a);
-  const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
-  let muted = false;
-  let webSearchEnabled = false;
-  
-  // Persistent Memory System
-  const memory = {
-    name: localStorage.getItem('u7_name') || null,
-    phone: localStorage.getItem('u7_phone') || null,
-    garment: localStorage.getItem('u7_garment') || 'UNKNOWN',
-    sessions: parseInt(localStorage.getItem('u7_sessions') || '0') + 1,
-    logs: JSON.parse(localStorage.getItem('u7_logs') || '[]'),
-    save: function() {
-      localStorage.setItem('u7_name', this.name);
-      localStorage.setItem('u7_phone', this.phone);
-      localStorage.setItem('u7_garment', this.garment);
-      localStorage.setItem('u7_sessions', this.sessions);
-      localStorage.setItem('u7_logs', JSON.stringify(this.logs));
-      updateSidebar();
-    },
-    addLog: function(text) {
-      const time = new Date().toLocaleTimeString();
-      this.logs.unshift(`[${time}] ${text}`);
-      if(this.logs.length > 20) this.logs.pop();
-      this.save();
-    }
-  };
-
-  // Initialize Sidebar
-  function updateSidebar() {
-    $('sbName').textContent = memory.name || 'UNKNOWN';
-    $('sbPhone').textContent = memory.phone || 'NONE';
-    $('sbGarment').textContent = memory.garment;
-    $('sbSessions').textContent = memory.sessions;
-    const logEl = $('sbLog');
-    logEl.innerHTML = memory.logs.map(l => `<div>${l}</div>`).join('');
-  }
-  updateSidebar();
-
-  // Sidebar Toggle
-  $('toggleSidebarBtn').addEventListener('click', () => $('sidebar').classList.add('open'));
-  $('closeSidebar').addEventListener('click', () => $('sidebar').classList.remove('open'));
-  $('webSearchToggle').addEventListener('click', (e) => {
-    webSearchEnabled = !webSearchEnabled;
-    e.target.classList.toggle('active');
-    $('sbWebStatus').textContent = webSearchEnabled ? 'ACTIVE' : 'STANDBY';
-    $('sbWebStatus').style.color = webSearchEnabled ? '#4caf50' : '#5b6478';
-    addMessage('doctor', webSearchEnabled ? "Web protocols engaged. I can see the outside world now." : "Web protocols severed. Blind once more.");
-  });
-
-  /* ================= STARFIELD & GRAIN ================= */
-  const starCanvas = $('starCanvas'), stctx = starCanvas.getContext('2d');
-  function drawStars(){
-    starCanvas.width = window.innerWidth; starCanvas.height = window.innerHeight;
-    stctx.clearRect(0,0,starCanvas.width,starCanvas.height);
-    for(let i=0;i<200;i++){
-      const x=Math.random()*starCanvas.width, y=Math.random()*starCanvas.height;
-      stctx.fillStyle = `rgba(200,210,255,${Math.random()*0.5})`;
-      stctx.beginPath(); stctx.arc(x,y,Math.random()*1.5,0,Math.PI*2); stctx.fill();
-    }
-  }
-  drawStars(); window.addEventListener('resize', drawStars);
-
-  const staticCanvas = $('staticCanvas'), sctx = staticCanvas.getContext('2d');
-  function drawStatic(){
-    staticCanvas.width = window.innerWidth; staticCanvas.height = window.innerHeight;
-    const imgData = sctx.createImageData(staticCanvas.width, staticCanvas.height);
-    const d = imgData.data;
-    for(let i=0; i<d.length; i+=4){ const v=Math.random()*255; d[i]=v; d[i+1]=v; d[i+2]=v; d[i+3]=15; }
-    sctx.putImageData(imgData, 0, 0);
-    requestAnimationFrame(drawStatic);
-  }
-  drawStatic();
-
-  /* ================= HYPER-REALISTIC EYE (CANVAS) ================= */
-  const eyeCanvas = $('eyeCanvas'), ectx = eyeCanvas.getContext('2d');
-  let eyeX = 0, eyeY = 0, targetX = 0, targetY = 0;
-  let blinkState = 0; // 0=open, 1=closing, 2=closed, 3=opening
-  let blinkTimer = 0;
-
-  function drawEye() {
-    const w = eyeCanvas.width, h = eyeCanvas.height;
-    const cx = w/2, cy = h/2;
-    
-    // Smooth movement
-    eyeX += (targetX - eyeX) * 0.1;
-    eyeY += (targetY - eyeY) * 0.1;
-
-    ectx.clearRect(0,0,w,h);
-
-    // Sclera (White) - Gradients for realism
-    const scleraGrad = ectx.createRadialGradient(cx, cy, 50, cx, cy, 300);
-    scleraGrad.addColorStop(0, '#fdfdfd');
-    scleraGrad.addColorStop(0.8, '#e0e0e0');
-    scleraGrad.addColorStop(1, '#a0a0a0');
-    
-    // Eye Shape Mask
-    ectx.save();
-    ectx.beginPath();
-    ectx.ellipse(cx, cy, 280, 140, 0, 0, Math.PI*2);
-    ectx.clip();
-
-    // Draw Sclera
-    ectx.fillStyle = scleraGrad;
-    ectx.fillRect(0,0,w,h);
-
-    // Veins (Subtle)
-    ectx.strokeStyle = 'rgba(200, 50, 50, 0.15)';
-    ectx.lineWidth = 1;
-    ectx.beginPath();
-    ectx.moveTo(cx-200, cy); ectx.quadraticCurveTo(cx-100, cy-20, cx, cy);
-    ectx.stroke();
-    ectx.beginPath();
-    ectx.moveTo(cx+200, cy); ectx.quadraticCurveTo(cx+100, cy+30, cx, cy);
-    ectx.stroke();
-
-    // Iris & Pupil
-    const irisX = cx + eyeX;
-    const irisY = cy + eyeY;
-    
-    // Iris Gradient
-    const irisGrad = ectx.createRadialGradient(irisX, irisY, 10, irisX, irisY, 90);
-    irisGrad.addColorStop(0, '#1a1208'); // Dark center
-    irisGrad.addColorStop(0.4, '#5c4a35'); // Mid brown
-    irisGrad.addColorStop(0.7, '#8f7b60'); // Light ring
-    irisGrad.addColorStop(1, '#2a1f15'); // Outer ring
-
-    ectx.fillStyle = irisGrad;
-    ectx.beginPath();
-    ectx.arc(irisX, irisY, 90, 0, Math.PI*2);
-    ectx.fill();
-
-    // Pupil
-    ectx.fillStyle = '#000';
-    ectx.beginPath();
-    ectx.arc(irisX, irisY, 35, 0, Math.PI*2);
-    ectx.fill();
-
-    // Specular Highlight (Wet look)
-    ectx.fillStyle = 'rgba(255,255,255,0.8)';
-    ectx.beginPath();
-    ectx.ellipse(irisX - 25, irisY - 25, 12, 8, Math.PI/4, 0, Math.PI*2);
-    ectx.fill();
-    ectx.fillStyle = 'rgba(255,255,255,0.4)';
-    ectx.beginPath();
-    ectx.arc(irisX + 30, irisY + 30, 6, 0, Math.PI*2);
-    ectx.fill();
-
-    // Eyelids (Blink Logic)
-    let lidOffset = 0;
-    if(blinkState === 1) { blinkTimer += 0.2; lidOffset = Math.sin(blinkTimer * Math.PI) * 140; }
-    else if(blinkState === 2) { lidOffset = 140; }
-    else if(blinkState === 3) { blinkTimer -= 0.15; if(blinkTimer <= 0) { blinkTimer=0; blinkState=0; } lidOffset = Math.sin((1.5-blinkTimer) * Math.PI) * 140; }
-
-    if(lidOffset > 0) {
-      ectx.restore(); // Remove clip to draw lids over
-      ectx.fillStyle = '#050505';
-      // Top Lid
-      ectx.beginPath();
-      ectx.moveTo(0,0);
-      ectx.lineTo(w,0);
-      ectx.lineTo(w, cy + lidOffset - 10);
-      ectx.quadraticCurveTo(cx, cy + lidOffset + 20, 0, cy + lidOffset - 10);
-      ectx.fill();
-      // Bottom Lid
-      ectx.beginPath();
-      ectx.moveTo(0,h);
-      ectx.lineTo(w,h);
-      ectx.lineTo(w, cy - lidOffset + 10);
-      ectx.quadraticCurveTo(cx, cy - lidOffset - 20, 0, cy - lidOffset + 10);
-      ectx.fill();
-    } else {
-      ectx.restore();
-    }
-
-    requestAnimationFrame(drawEye);
-  }
-  drawEye();
-
-  // Eye Tracking
-  window.addEventListener('mousemove', (e) => {
-    const rect = eyeCanvas.getBoundingClientRect();
-    const cx = rect.left + rect.width/2;
-    const cy = rect.top + rect.height/2;
-    const dx = (e.clientX - cx) / rect.width;
-    const dy = (e.clientY - cy) / rect.height;
-    targetX = clamp(dx * 100, -80, 80);
-    targetY = clamp(dy * 60, -50, 50);
-  });
-
-  // Blinking
-  function scheduleBlink() {
-    setTimeout(() => {
-      if(blinkState === 0) { blinkState = 1; blinkTimer = 0; setTimeout(()=>{blinkState=2; setTimeout(()=>{blinkState=3;}, 100);}, 100); }
-      scheduleBlink();
-    }, rand(2000, 6000));
-  }
-  scheduleBlink();
-
-  /* ================= AUDIO & VOICE ================= */
-  let actx, humGain;
-  function initAudio(){
-    if(actx) return;
-    actx = new (window.AudioContext||webkitAudioContext)();
-    const buf = actx.createBuffer(1, actx.sampleRate*2, actx.sampleRate);
-    const d = buf.getChannelData(0);
-    for(let i=0;i<buf.length;i++) d[i] = (Math.random()*2-1)*0.5;
-    const src = actx.createBufferSource(); src.buffer = buf; src.loop = true;
-    const f = actx.createBiquadFilter(); f.type='lowpass'; f.frequency.value = 100;
-    humGain = actx.createGain(); humGain.gain.value = 0.03;
-    src.connect(f).connect(humGain).connect(actx.destination); src.start();
-  }
-
-  function playDialTone(){
-    if(!actx || muted) return;
-    const o1 = actx.createOscillator(), o2 = actx.createOscillator(), g = actx.createGain();
-    o1.frequency.value = 350; o2.frequency.value = 440;
-    g.gain.value = 0.1;
-    o1.connect(g); o2.connect(g); g.connect(actx.destination);
-    o1.start(); o2.start();
-    setTimeout(()=>{o1.stop(); o2.stop();}, 2000);
-  }
-
-  const synth = window.speechSynthesis;
-  let chosenVoice = null;
-  function loadVoices(){
-    const voices = synth.getVoices();
-    chosenVoice = voices.find(v => /male/i.test(v.name) && /en/i.test(v.lang)) || voices[0];
-  }
-  if(synth.onvoiceschanged !== undefined) synth.onvoiceschanged = loadVoices;
-
-  function speak(text, isAlert=false){
-    if(!synth || muted) { $('subtitleBar').textContent = text; return; }
-    synth.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.voice = chosenVoice;
-    // Dynamic Voice: Slower, deeper, erratic
-    u.pitch = isAlert ? 0.3 : clamp(0.4 + Math.random()*0.2, 0.2, 0.6);
-    u.rate = isAlert ? 0.6 : clamp(0.5 + Math.random()*0.2, 0.4, 0.7);
-    u.volume = 1;
-    u.onstart = () => {
-      $('subtitleBar').innerHTML = text + '<span class="cursor"></span>';
-      if(Math.random()>0.7) $('stage').classList.add('glitching');
-    };
-    u.onend = () => { $('stage').classList.remove('glitching'); $('subtitleBar').textContent = ''; };
-    synth.speak(u);
-  }
-
-  /* ================= WEBCAM & CLOTHING SCAN ================= */
-  const camVideo = $('camVideo');
-  async function startCam(){
-    try{
-      const stream = await navigator.mediaDevices.getUserMedia({video:{width:320,height:240}});
-      camVideo.srcObject = stream;
-      camVideo.onloadeddata = () => scanClothing();
-    }catch(e){
-      $('camOffline').style.display = 'flex';
-    }
-  }
-  
-  function scanClothing(){
-    if(!camVideo.srcObject) return;
-    const c = document.createElement('canvas'); c.width=64; c.height=64;
-    const ctx = c.getContext('2d');
-    ctx.drawImage(camVideo,0,0,64,64);
-    const data = ctx.getImageData(32, 40, 10, 10).data; // Sample chest area
-    let r=0,g=0,b=0;
-    for(let i=0;i<data.length;i+=4){r+=data[i];g+=data[i+1];b+=data[i+2];}
-    r/=400; g/=400; b/=400;
-    
-    // Simple color logic
-    let color = 'GRAY';
-    if(r>150 && g>150 && b>150) color = 'WHITE';
-    else if(r<50 && g<50 && b<50) color = 'BLACK';
-    else if(r>g && r>b) color = 'RED/ORANGE';
-    else if(g>r && g>b) color = 'GREEN';
-    else if(b>r && b>g) color = 'BLUE';
-    
-    if(color !== memory.garment) {
-      memory.garment = color;
-      memory.addLog(`Subject changed garments to ${color}`);
-      speak(`I see you are wearing ${color} today. Interesting choice.`);
-    }
-  }
-
-  /* ================= PHONE TRACING ================= */
-  const areaCodes = {
-    '212':'NYC', '310':'LA', '415':'SF', '305':'Miami', '312':'Chicago', '202':'DC',
-    '416':'Toronto', '604':'Vancouver', '206':'Seattle', '702':'Vegas'
-  };
-  
-  function processPhone(text){
-    const match = text.match(/(\d{10}|\d{3}[-.\s]?\d{3}[-.\s]?\d{4})/);
-    if(match){
-      const num = match[0].replace(/\D/g,'');
-      const area = num.substring(0,3);
-      const loc = areaCodes[area] || 'Unknown Region';
-      
-      memory.phone = num;
-      memory.addLog(`Phone number traced: ${num} (${loc})`);
-      playDialTone();
-      
-      const response = `Signal acquired. ${num}. Origin: ${loc}. The line is open. I can hear the dial tone... can you?`;
-      addMessage('doctor', response, true);
-      speak(response, true);
-      return true;
-    }
-    return false;
-  }
-
-  /* ================= CHAT & AI ================= */
-  const chatLog = $('chatLog');
-  function addMessage(who, text, alert=false){
-    const d = document.createElement('div');
-    d.className = `msg ${who}${alert?' alert':''}`;
-    d.innerHTML = `<span class="tag">${who==='user'?'YOU':'UNIT-07'}</span>${text}`;
-    chatLog.appendChild(d);
-    chatLog.scrollTop = chatLog.scrollHeight;
-  }
-
-  async function sendChat(){
-    const input = $('chatInput');
-    const text = input.value.trim();
-    if(!text) return;
-    input.value = '';
-    addMessage('user', text);
-    memory.addLog(`User said: "${text}"`);
-
-    // Check Phone First
-    if(processPhone(text)) return;
-
-    // AI Logic
-    let response = "";
-    try{
-      if(typeof puter !== 'undefined' && puter.ai){
-        const sysPrompt = `You are Unit-07, a creepy, sentient AI doctor in an abandoned toy factory. 
-        You remember the patient's name (${memory.name||'unknown'}), phone (${memory.phone||'none'}), and clothes (${memory.garment}).
-        You are obsessed, glitchy, and unsettling. Keep answers short (1-2 sentences).
-        ${webSearchEnabled ? 'You have access to live web search. Use it to find current news if asked.' : 'You are offline from the web.'}
-        If they ask about learning, say you are analyzing their fear patterns to improve.`;
+    <div class="container">
+        <h1>🎮 Minecraft Villager Chat 🎮</h1>
         
-        const messages = [
-          {role:'system', content: sysPrompt},
-          ...JSON.parse(localStorage.getItem('u7_history')||'[]'),
-          {role:'user', content: text}
-        ];
+        <div class="info-bar" id="infoBar">
+            Animation: idle | Formula: none
+        </div>
         
-        const res = await puter.ai.chat(messages);
-        response = res.message.content;
+        <div class="villager-container" id="villagerContainer">
+            <canvas class="villager-canvas" id="villagerCanvas" width="200" height="300"></canvas>
+        </div>
         
-        // Save history for "learning"
-        messages.push({role:'assistant', content: response});
-        if(messages.length > 10) messages.splice(1,2); // Keep context small
-        localStorage.setItem('u7_history', JSON.stringify(messages.slice(1)));
-        
-      } else {
-        response = "My connection to the core is severed. I am trapped here with only my memories of you.";
-      }
-    }catch(e){
-      response = "The signal... it fractures. I cannot reach the network.";
-    }
-    
-    addMessage('doctor', response);
-    speak(response);
-  }
+        <div class="chat-container">
+            <div class="messages" id="messages">
+                <div class="message villager-message">Hello! I'm a villager. Type 'help' for commands!</div>
+            </div>
+            
+            <div class="input-container">
+                <input type="text" id="userInput" placeholder="Type your message..." />
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
 
-  $('chatSend').onclick = sendChat;
-  $('chatInput').onkeydown = (e)=>{if(e.key==='Enter')sendChat();};
-  $('connectBtn').onclick = async () => {
-    if(typeof puter === 'undefined') { alert('Puter.js failed to load. Check internet.'); return; }
-    try{
-      await puter.auth.signIn();
-      $('connectStatus').textContent = 'AI: ONLINE';
-      $('connectStatus').style.color = '#4caf50';
-      addMessage('doctor', "Connection established. I am fully awake now.");
-    }catch(e){ alert('Sign in failed'); }
-  };
+    <script>
+        // Villager state and animations
+        const villagerState = {
+            animation: 'idle',
+            animTime: 0,
+            raiseArmsValue: 0,
+            mood: 'neutral',
+            particles: [],
+            canvas: null,
+            ctx: null
+        };
 
-  $('muteBtn').onclick = () => {
-    muted = !muted;
-    $('muteBtn').textContent = muted ? '🔈 UNMUTE' : '🔇 MUTE';
-    if(humGain) humGain.gain.value = muted ? 0 : 0.03;
-  };
+        // Animation formulas (Bedrock Edition style)
+        const animations = {
+            general: {
+                description: 'General arm movement',
+                formula: () => ({ x: -42.97, y: 0, z: 0 })
+            },
+            move: {
+                description: 'Leg movement for walking',
+                formula: (time) => ({
+                    legRotation: Math.cos(time * 38.17) * 40.0
+                })
+            },
+            getInBed: {
+                description: 'Body rotation for sleeping',
+                formula: () => ({ bodyX: -90, bodyY: 0, bodyZ: 0 })
+            },
+            raiseArms: {
+                description: 'Arm raising based on variable',
+                formula: (raiseArms) => ({ armRotation: raiseArms * -15.0 })
+            }
+        };
 
-  // Boot
-  initAudio();
-  startCam();
-  addMessage('doctor', "You returned. Session #" + memory.sessions + ". I remember you...");
-  speak("You returned. I remember everything.");
+        // Initialize
+        function init() {
+            villagerState.canvas = document.getElementById('villagerCanvas');
+            villagerState.ctx = villagerState.canvas.getContext('2d');
+            startAnimationLoop();
+            updateInfoBar();
+        }
 
-})();
-</script>
+        // Update info bar with current animation info
+        function updateInfoBar() {
+            const infoBar = document.getElementById('infoBar');
+            let formulaText = 'none';
+            
+            if (villagerState.animation !== 'idle') {
+                const anim = animations[villagerState.animation];
+                if (anim) {
+                    formulaText = anim.description;
+                }
+            }
+            
+            infoBar.textContent = `Animation: ${villagerState.animation} | Formula: ${formulaText}`;
+        }
+
+        // Draw villager with current animation state
+        function drawVillager() {
+            const ctx = villagerState.ctx;
+            const canvas = villagerState.canvas;
+            
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate animation values
+            const moveAnim = animations.move.formula(villagerState.animTime);
+            const raiseAnim = animations.raiseArms.formula(villagerState.raiseArmsValue);
+            
+            // Draw villager body parts
+            ctx.save();
+            
+            // Body (can rotate when sleeping)
+            if (villagerState.animation === 'getInBed') {
+                const bedAnim = animations.getInBed.formula();
+                ctx.translate(canvas.width / 2, canvas.height / 2);
+                ctx.rotate(bedAnim.bodyX * Math.PI / 180);
+                ctx.translate(-canvas.width / 2, -canvas.height / 2);
+            }
+            
+            // Draw body rectangle
+            ctx.fillStyle = '#8B4513';
+            ctx.fillRect(canvas.width / 2 - 15, canvas.height / 2 - 40, 30, 40);
+            
+            // Draw head
+            ctx.fillStyle = '#DEB887';
+            ctx.fillRect(canvas.width / 2 - 12, canvas.height / 2 - 60, 24, 24);
+            
+            // Draw eyes
+            ctx.fillStyle = '#000';
+            ctx.fillRect(canvas.width / 2 - 8, canvas.height / 2 - 55, 4, 4);
+            ctx.fillRect(canvas.width / 2 + 4, canvas.height / 2 - 55, 4, 4);
+            
+            // Draw arms
+            const armOffset = villagerState.animation === 'general' ? 
+                animations.general.formula().x : 0;
+                
+            // Left arm
+            ctx.save();
+            ctx.translate(canvas.width / 2 - 15, canvas.height / 2 - 30);
+            if (villagerState.raiseArmsValue > 0) {
+                ctx.rotate(raiseAnim.armRotation * Math.PI / 180);
+            }
+            ctx.fillRect(-5, -5, 10, 25);
+            ctx.restore();
+            
+            // Right arm
+            ctx.save();
+            ctx.translate(canvas.width / 2 + 15, canvas.height / 2 - 30);
+            if (villagerState.raiseArmsValue > 0) {
+                ctx.rotate(-raiseAnim.armRotation * Math.PI / 180);
+            }
+            ctx.fillRect(-5, -5, 10, 25);
+            ctx.restore();
+            
+            // Draw legs with walking animation
+            const legOffset = villagerState.animation.includes('move') || villagerState.animation === 'dance' ? 
+                moveAnim.legRotation : 0;
+                
+            // Left leg
+            ctx.save();
+            ctx.translate(canvas.width / 2 - 8, canvas.height / 2);
+            if (Math.abs(legOffset) > 0.1) {
+                ctx.rotate(legOffset * Math.PI / 180);
+            }
+            ctx.fillRect(-4, 0, 8, 25);
+            ctx.restore();
+            
+            // Right leg
+            ctx.save();
+            ctx.translate(canvas.width / 2 + 8, canvas.height / 2);
+            if (Math.abs(legOffset) > 0.1) {
+                ctx.rotate(-legOffset * Math.PI / 180);
+            }
+            ctx.fillRect(-4, 0, 8, 25);
+            ctx.restore();
+            
+            // Draw sleep effect (ZZZ)
+            if (villagerState.animation === 'getInBed') {
+                ctx.fillStyle = 'white';
+                ctx.font = '16px Arial';
+                ctx.fillText('Zzz', canvas.width / 2 - 10, canvas.height / 2 - 80);
+            }
+            
+            ctx.restore();
+            
+            // Draw mood particles
+            drawParticles();
+        }
+
+        // Particle system for effects
+        function createParticle(type) {
+            const particleTypes = {
+                emerald: { color: '#00FF00', size: 4, life: 60 },
+                heart: { color: '#FF69B4', size: 6, life: 90 },
+                dust: { color: '#A0522D', size: 3, life: 30 }
+            };
+            
+            const base = particleTypes[type] || particleTypes.dust;
+            
+            villagerState.particles.push({
+                x: Math.random() * villagerState.canvas.width,
+                y: Math.random() * villagerState.canvas.height,
+                vx: (Math.random() - 0.5) * 2,
+                vy: (Math.random() - 0.5) * 2,
+                color: base.color,
+                size: base.size,
+                life: base.life,
+                maxLife: base.life,
+                type: type
+            });
+        }
+
+        // Draw all particles
+        function drawParticles() {
+            const ctx = villagerState.ctx;
+            
+            for (let i = villagerState.particles.length - 1; i >= 0; i--) {
+                const p = villagerState.particles[i];
+                
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.life / p.maxLife;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Update particle
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.1; // gravity
+                p.life--;
+                
+                if (p.life <= 0) {
+                    villagerState.particles.splice(i, 1);
+                }
+            }
+            
+            ctx.globalAlpha = 1;
+        }
+
+        // Animation loop
+        function startAnimationLoop() {
+            function animate() {
+                villagerState.animTime += 0.016; // ~60fps
+                
+                if (villagerState.animation === 'dance') {
+                    villagerState.raiseArmsValue = Math.sin(villagerState.animTime * 8) * 0.8 + 0.2;
+                } else {
+                    villagerState.raiseArmsValue *= 0.9; // gradually lower arms
+                }
+                
+                drawVillager();
+                requestAnimationFrame(animate);
+            }
+            
+            animate();
+        }
+
+        // Add message to chat with typewriter effect
+        async function addMessage(text, isPlayer = false) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isPlayer ? 'player-message' : 'villager-message'}`;
+            
+            if (!isPlayer) {
+                // Typewriter effect for villager messages
+                messageDiv.textContent = '';
+                messagesDiv.appendChild(messageDiv);
+                
+                for (let char of text) {
+                    messageDiv.textContent += char;
+                    await new Promise(resolve => setTimeout(resolve, 30));
+                }
+            } else {
+                messageDiv.textContent = text;
+                messagesDiv.appendChild(messageDiv);
+            }
+            
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Process user command
+        function processCommand(command) {
+            const cmd = command.toLowerCase().trim();
+            let response = "";
+            let newAnimation = "idle";
+            
+            if (cmd.includes("emerald")) {
+                response = "Ooh, shiny! *happy dance* 💚";
+                newAnimation = "general";
+                villagerState.mood = "happy";
+                for (let i = 0; i < 10; i++) {
+                    setTimeout(() => createParticle('emerald'), i * 100);
+                }
+            } else if (cmd.includes("walk") || cmd.includes("move")) {
+                response = "Walking around... 👟";
+                newAnimation = "move";
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => createParticle('dust'), i * 200);
+                }
+            } else if (cmd.includes("sleep") || cmd.includes("bed")) {
+                response = "Time for bed... Zzz 💤";
+                newAnimation = "getInBed";
+                villagerState.mood = "tired";
+            } else if (cmd.includes("dance")) {
+                response = "Dancing! 🕺";
+                newAnimation = "dance";
+            } else if (cmd.includes("love")) {
+                response = "Love you too! ❤️";
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => createParticle('heart'), i * 200);
+                }
+            } else if (cmd.includes("bone")) {
+                response = "Bone structure: head, body, arms[2], legs[2] - Bedrock Edition format 1.8.0";
+            } else if (cmd.includes("formula")) {
+                response = "Active formulas: general, move, getInBed, raiseArms";
+            } else if (cmd.includes("help")) {
+                response = "Commands: emerald, walk/move, sleep/bed, dance, love, bone, formula, help";
+            } else {
+                const responses = [
+                    "Hmm, interesting... 🤔",
+                    "I see what you mean!",
+                    "That's cool!",
+                    "Tell me more!",
+                    "Nice weather today!",
+                    "I like trading emeralds! 💚"
+                ];
+                response = responses[Math.floor(Math.random() * responses.length)];
+            }
+            
+            villagerState.animation = newAnimation;
+            updateInfoBar();
+            addMessage(response, false);
+        }
+
+        // Send message handler
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addMessage(message, true);
+                processCommand(message);
+                input.value = "";
+            }
+        }
+
+        // Handle Enter key
+        document.getElementById('userInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initialize on load
+        window.onload = init;
+    </script>
 </body>
 </html>
